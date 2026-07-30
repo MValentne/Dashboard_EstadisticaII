@@ -1,0 +1,71 @@
+## Build outputs
+[Dd]ebug/
+[Dd]ebugPS/
+[Rr]elease/
+[Rr]eleasePS/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Log]s/
+[Tt]est[Rr]esults/
+
+## Visual Studio cache and settings
+.vs/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+## VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/code-workspace
+
+## Rider / JetBrains
+.idea/
+*.sln.iml
+.sln.DotSettings.user
+
+## OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## dotnet tools and packages
+.dotnet/
+*.nupkg
+## NuGet Packages
+**/[Pp]ackages/*
+!**/[Pp]ackages/repositories.config
+**/[Pp]ackages/:p/
+/*_i.c
+/*_p.c
+/*.ilk
+/*.meta
+/*.obj
+/*.pch
+/*.pdb
+/*.pgc
+/*.pgd
+/*.rsp
+/*.sbr
+/*.tlb
+/*.tli
+/*.tlh
+/*.tmp
+/*.tmp_proj
+/*_wpftmp.csproj
+/*.log
+/*.vspscc
+/*.vsscc
+/mssccprj.scc
+/vssver.scc
+/vssver2.scc
+/*.nuproj
