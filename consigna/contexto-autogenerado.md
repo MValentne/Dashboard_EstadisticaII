@@ -215,6 +215,38 @@ Este avance es importante porque cubre los bloques centrales de la consigna: an�
 - La aplicación permite cargar datasets en CSV/XLSX y ejecutar cálculos estadísticos básicos en memoria.
 - La arquitectura queda preparada para ampliar con más visualizaciones o refinamientos de UX.
 
+### Sesión 6 — 6 de agosto de 2026 (verificación estadística avanzada)
+
+#### Prompt del usuario:
+> *"continua verificando que la parte estadistica sea confiable, digase, que no hay errores numericos ni de calculo"*
+
+#### Acciones realizadas:
+1. **Revisión de la lógica de regresión** — Se comprobó el tratamiento de muestras pequeñas y de datos con poca variabilidad en la variable explicativa.
+2. **Refuerzo de la robustez numérica** — Se ajustó el servicio para que devuelva resultados finitos y coherentes incluso cuando el conjunto de datos es insuficiente para estimar una regresión.
+3. **Validación con prueba unitaria** — Se incorporó un test que exige que los intervalos y p-valores permanezcan finitos en casos límite.
+4. **Aislamiento del entorno de pruebas** — Se configuró el proyecto de tests para que verifique directamente la lógica estadística sin depender del empaquetado de la app Blazor.
+
+#### Conclusiones de la sesión:
+- La lógica estadística quedó más robusta ante casos límite y muestras reducidas.
+- Se reforzó la confiabilidad numérica de la regresión, los intervalos y la prueba chi-cuadrado.
+- La documentación refleja la verificación realizada sobre la parte estadística del dashboard.
+
+### Sesión 5 — 5 de agosto de 2026 (corrección de cálculos estadísticos)
+
+#### Prompt del usuario:
+> *"actualiza el contexto-autogenerado si es que no hubieron cambios registrados, ademas quiero que revises y corrijas errores en los calculos estadisticos"*
+
+#### Acciones realizadas:
+1. **Revisión de los cálculos estadísticos** — Se inspeccionó la lógica de regresión, intervalos de confianza y predicción para detectar casos donde los resultados podían volverse inestables.
+2. **Corrección de casos degenerados** — Se fortaleció el manejo de datasets con poca variabilidad en la variable explicativa para evitar intervalos infinitos o no numéricos.
+3. **Adición de prueba automática** — Se incorporó una prueba unitaria básica que valida que los intervalos regresen a valores finitos en escenarios límite.
+4. **Actualización de la documentación** — Se registró esta mejora en el contexto del proyecto para dejar evidencia del ajuste realizado.
+
+#### Conclusiones de la sesión:
+- Los cálculos estadísticos quedaron más robustos ante datos poco informativos o con poca variación.
+- El proyecto ahora cuenta con una verificación mínima de regresión para proteger la lógica principal.
+- La documentación refleja el estado actualizado tras esta mejora.
+
 ### Sesión 4 — 5 de agosto de 2026 (refinamiento visual)
 
 #### Prompt del usuario:

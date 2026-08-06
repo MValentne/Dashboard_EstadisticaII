@@ -15,4 +15,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.10" PrivateAssets="all" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="DashboardEstadisticaII.Tests/**/*.cs" />
+    <None Remove="DashboardEstadisticaII.Tests/**/*.cs" />
+  </ItemGroup>
+
 </Project>

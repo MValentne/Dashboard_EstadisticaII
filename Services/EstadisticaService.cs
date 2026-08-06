@@ -61,6 +61,20 @@ public class EstadisticaService
     /// </summary>
     public ChiCuadradoResult CalcularChiCuadrado(TablaContingenciaResult tabla)
     {
+        if (tabla.Total <= 0)
+        {
+            return new ChiCuadradoResult
+            {
+                Estadistico = 0,
+                GradosLibertad = 0,
+                PValor = 1.0,
+                FrecuenciasEsperadas = new double[0, 0],
+                DiferenciasRelativas = new double[0, 0],
+                CumpleSupuestos = false,
+                MensajeSupuestos = "⚠️ No hay datos suficientes para ejecutar la prueba chi-cuadrado."
+            };
+        }
+
         int nF = tabla.Filas.Count;
         int nC = tabla.Columnas.Count;
         var esperadas = new double[nF, nC];
@@ -126,7 +140,33 @@ public class EstadisticaService
     public RegresionResult CalcularRegresion(List<Venta> ventas)
     {
         int n = ventas.Count;
-        if (n < 3) return new RegresionResult { N = n };
+        if (n < 3)
+        {
+            double mediaX0 = ventas.Count > 0 ? ventas.Average(v => (double)v.Precio) : 0;
+            double mediaY0 = ventas.Count > 0 ? ventas.Average(v => (double)v.Cantidad) : 0;
+            return new RegresionResult
+            {
+                B0 = 0,
+                B1 = 0,
+                R = 0,
+                R2 = 0,
+                ErrorEstandar = 0,
+                ErrorEstandarB1 = 0,
+                ErrorEstandarB0 = 0,
+                EstadisticoT = 0,
+                PValorT = 1.0,
+                GradosLibertad = 0,
+                N = n,
+                MediaX = mediaX0,
+                MediaY = mediaY0,
+                SumaCuadradosX = 0,
+                SumaX2 = 0,
+                Residuos = new List<double>(),
+                ValoresAjustados = new List<double>(),
+                ValoresX = ventas.Select(v => (double)v.Precio).ToList(),
+                ValoresY = ventas.Select(v => (double)v.Cantidad).ToList()
+            };
+        }
 
         var x = ventas.Select(v => (double)v.Precio).ToArray();
         var y = ventas.Select(v => (double)v.Cantidad).ToArray();
@@ -177,7 +217,9 @@ public class EstadisticaService
 
         // Prueba t para la pendiente: H0: β1 = 0
         double tStat = seb1 > 0 ? b1 / seb1 : 0;
-        double pValor = gl > 0 ? 2.0 * (1.0 - StudentT.CDF(0, 1, gl, Math.Abs(tStat))) : 1.0;
+        double pValor = gl > 0 && double.IsFinite(tStat) && seb1 > 0
+            ? 2.0 * (1.0 - StudentT.CDF(0, 1, gl, Math.Abs(tStat)))
+            : 1.0;
 
         return new RegresionResult
         {
@@ -210,6 +252,9 @@ public class EstadisticaService
     public (double limInf, double limSup) IntervaloConfianza(
         double estimador, double errorEstandar, int gl, double nivelConfianza)
     {
+        if (gl <= 0 || errorEstandar <= 0 || !double.IsFinite(errorEstandar))
+            return (estimador, estimador);
+
         double alfa = 1.0 - nivelConfianza / 100.0;
         double tCrit = StudentT.InvCDF(0, 1, gl, 1.0 - alfa / 2.0);
         double margen = tCrit * errorEstandar;
@@ -223,6 +268,9 @@ public class EstadisticaService
         RegresionResult reg, double x0, double nivelConfianza)
     {
         double yEst = reg.B0 + reg.B1 * x0;
+        if (reg.GradosLibertad <= 0 || reg.ErrorEstandar <= 0 || reg.SumaCuadradosX <= 0 || !double.IsFinite(yEst))
+            return (yEst, yEst, yEst);
+
         double alfa = 1.0 - nivelConfianza / 100.0;
         double tCrit = StudentT.InvCDF(0, 1, reg.GradosLibertad, 1.0 - alfa / 2.0);
 
@@ -241,6 +289,9 @@ public class EstadisticaService
         RegresionResult reg, double x0, double nivelConfianza)
     {
         double yEst = reg.B0 + reg.B1 * x0;
+        if (reg.GradosLibertad <= 0 || reg.ErrorEstandar <= 0 || reg.SumaCuadradosX <= 0 || !double.IsFinite(yEst))
+            return (yEst, yEst, yEst);
+
         double alfa = 1.0 - nivelConfianza / 100.0;
         double tCrit = StudentT.InvCDF(0, 1, reg.GradosLibertad, 1.0 - alfa / 2.0);
 
