@@ -129,6 +129,21 @@
                     <p class="mt-3 mb-1 fw-semibold">Conclusión detallada</p>
                     <p class="text-muted mb-0">@InterpretacionPruebaT</p>
 
+                    <div class="mt-3">
+                        <svg viewBox="0 0 420 220" class="chart-svg">
+                            <line x1="30" y1="190" x2="390" y2="190" stroke="#6c757d" stroke-width="1"></line>
+                            <line x1="30" y1="20" x2="30" y2="190" stroke="#6c757d" stroke-width="1"></line>
+                            @foreach (var punto in PuntosRegresion)
+                            {
+                                <circle cx="@punto.X" cy="@punto.Y" r="4" fill="#0d6efd"></circle>
+                            }
+                            <line x1="30" y1="@YInterceptoRecta" x2="390" y2="@YFinalRecta" stroke="#fd7e14" stroke-width="2"></line>
+                        </svg>
+                        <div class="small text-muted mt-2">
+                            <div><strong>Gráfico:</strong> dispersión de precio vs. cantidad y recta de regresión estimada.</div>
+                        </div>
+                    </div>
+
                     <label class="form-label mt-3">Precio para predicción</label>
                     <input type="number" class="form-control mb-3" @bind="valorXPrediccion" min="0" step="100" />
 
@@ -139,7 +154,8 @@
                     <p class="text-muted mb-0">R² = @Regresion.R2.ToString("0.00", CultureInfo.InvariantCulture), lo que indica que una parte significativa de la variabilidad en cantidad se explica por el precio.</p>
 
                     <p class="mt-3 mb-1 fw-semibold">Intervalo de confianza para la pendiente</p>
-                    <p class="text-muted mb-0">@ICPendiente.limInf.ToString("0.000", CultureInfo.InvariantCulture) a @ICPendiente.limSup.ToString("0.000", CultureInfo.InvariantCulture)</p>
+                    <p class="text-muted mb-0">Con un @nivelConfianza% de confianza, el intervalo estimado para la pendiente es [@ICPendiente.limInf.ToString("0.000", CultureInfo.InvariantCulture), @ICPendiente.limSup.ToString("0.000", CultureInfo.InvariantCulture)].</p>
+                    <p class="text-muted mb-0">Si este intervalo contiene al 0, no hay evidencia suficiente para afirmar que la pendiente sea distinta de cero.</p>
                 </div>
             </div>
         </div>
@@ -273,6 +289,61 @@
         {
             var resultado = EstadisticaService.IntervaloPrediccion(Regresion, valorXPrediccion, nivelConfianza);
             return (resultado.limInf, resultado.limSup);
+        }
+    }
+
+    private List<(string X, string Y)> PuntosRegresion
+    {
+        get
+        {
+            var puntos = new List<(string X, string Y)>();
+            if (Regresion.ValoresX.Count == 0 || Regresion.ValoresY.Count == 0) return puntos;
+
+            double minX = Regresion.ValoresX.Min();
+            double maxX = Regresion.ValoresX.Max();
+            double minY = Regresion.ValoresY.Min();
+            double maxY = Regresion.ValoresY.Max();
+            double spanX = Math.Max(1, maxX - minX);
+            double spanY = Math.Max(1, maxY - minY);
+
+            for (int i = 0; i < Regresion.ValoresX.Count; i++)
+            {
+                double x = 30 + ((Regresion.ValoresX[i] - minX) / spanX) * 360;
+                double y = 190 - ((Regresion.ValoresY[i] - minY) / spanY) * 170;
+                puntos.Add((x.ToString(CultureInfo.InvariantCulture), y.ToString(CultureInfo.InvariantCulture)));
+            }
+
+            return puntos;
+        }
+    }
+
+    private string YInterceptoRecta
+    {
+        get
+        {
+            double minX = Regresion.ValoresX.Min();
+            double maxX = Regresion.ValoresX.Max();
+            double minY = Regresion.ValoresY.Min();
+            double maxY = Regresion.ValoresY.Max();
+            double spanY = Math.Max(1, maxY - minY);
+            double y0 = 190 - ((Regresion.B0 + Regresion.B1 * minX - minY) / spanY) * 170;
+            double y1 = 190 - ((Regresion.B0 + Regresion.B1 * maxX - minY) / spanY) * 170;
+            return Math.Round(y0, 2).ToString(CultureInfo.InvariantCulture);
+        }
+    }
+
+    private string YFinalRecta
+    {
+        get
+        {
+            double minX = Regresion.ValoresX.Min();
+            double maxX = Regresion.ValoresX.Max();
+            double minY = Regresion.ValoresY.Min();
+            double maxY = Regresion.ValoresY.Max();
+            double spanY = Math.Max(1, maxY - minY);
+            double y0 = 190 - ((Regresion.B0 + Regresion.B1 * minX - minY) / spanY) * 170;
+            double y1 = 190 - ((Regresion.B0 + Regresion.B1 * maxX - minY) / spanY) * 170;
+            return Math.Round(y1, 2).ToString(CultureInfo.InvariantCulture);
         }
     }
 

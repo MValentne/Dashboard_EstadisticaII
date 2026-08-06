@@ -263,6 +263,36 @@ Este avance es importante porque cubre los bloques centrales de la consigna: an�
 - El proyecto ya incluye mayor detalle inferencial en ambas páginas y una presentación más completa de los resultados.
 - El bloqueo de build local se registra para que el próximo paso sea corregir el entorno antes de continuar la validación.
 
+### Sesión 9 — 6 de agosto de 2026 (documentación de despliegue y corrección de regresión)
+
+#### Prompt del usuario:
+> *"documenta lo que sucedio y ademas agrega planes para arreglar la parte del modelo de regresion, se quito la grafica que era un punto importante en la segunda pagina, [prueba t para la pendiente] se llama la tarjeta, y ademas no sirve el final de la tarjeta donde habla del intervalo de confianza para la pendiente"*
+
+#### Lo ocurrido:
+- Se realizó el deploy a GitHub Pages mediante `deploy.sh` y el sitio quedó accesible en la URL pública del repositorio.
+- Se comprobó que el despliegue funcionaba correctamente y que la aplicación se servía desde GitHub Pages con la ruta base correcta.
+- Durante la revisión del módulo de inferencia se detectó que la tarjeta de “Prueba t para la pendiente” perdió parte de su utilidad visual y explicativa.
+- En particular, se evidenció que:
+  - la gráfica de dispersión con la recta de regresión dejó de mostrarse en esa tarjeta,
+  - la sección final del bloque, dedicada al intervalo de confianza para la pendiente, no estaba brindando una interpretación clara ni útil para el usuario,
+  - y la tarjeta quedaba demasiado centrada en métricas numéricas sin reforzar la relación visual entre precio y cantidad.
+
+#### Plan de corrección para la regresión y la tarjeta de inferencia:
+1. Restaurar la gráfica de dispersión y recta de regresión dentro de la tarjeta “Prueba t para la pendiente”.
+2. Reintegrar una visualización simple pero legible del ajuste lineal para que el usuario pueda ver la relación entre precio y cantidad.
+3. Corregir el bloque final del intervalo de confianza para la pendiente para que explique en lenguaje claro:
+   - el nivel de confianza utilizado,
+   - si el intervalo incluye o no al valor 0,
+   - y qué implicancia tiene esa situación en la prueba de hipótesis sobre la pendiente.
+4. Revisar el cálculo y la presentación del intervalo de confianza para asegurar que el valor mostrado sea consistente con el resultado de la prueba t.
+5. Si el problema persiste, validar la fórmula del intervalo y compararla con el resultado del estadístico t y el p-valor para confirmar que la interpretación sea estadísticamente correcta.
+6. Dejar la tarjeta con un formato más didáctico: métricas, interpretación textual, gráfico breve y conclusión final del intervalo.
+
+#### Conclusiones de la sesión:
+- El deploy quedó documentado y verificado.
+- La parte de regresión quedó identificada como un punto de mejora importante para la segunda página.
+- El siguiente paso será corregir visualmente la tarjeta y reforzar la explicación del intervalo de confianza para la pendiente.
+
 ### Sesión 5 — 5 de agosto de 2026 (corrección de cálculos estadísticos)
 
 #### Prompt del usuario:
