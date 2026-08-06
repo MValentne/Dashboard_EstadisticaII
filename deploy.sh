@@ -59,11 +59,17 @@ cd "$PUBLISH_DIR"
 
 # Initialize temporary git repo in the output directory
 git init
-git checkout -b gh-pages
+git checkout -B gh-pages
+
+git config user.name "${GIT_COMMITTER_NAME:-github-actions[bot]}"
+git config user.email "${GIT_COMMITTER_EMAIL:-github-actions[bot]@users.noreply.github.com}"
+git remote remove origin 2>/dev/null || true
+git remote add origin "$REMOTE_URL"
+
 git add .
-git commit -m "Deploy to GitHub Pages $(date)"
+git commit -m "Deploy to GitHub Pages $(date -u +%Y-%m-%dT%H:%M:%SZ)" --allow-empty
 
 # Force push to the gh-pages branch of the remote repository
-git push -f "$REMOTE_URL" gh-pages
+git push -f origin gh-pages
 
 echo "Successfully deployed to GitHub Pages!"
