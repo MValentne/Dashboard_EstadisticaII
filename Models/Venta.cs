@@ -36,6 +36,7 @@ public class ChiCuadradoResult
 {
     public double Estadistico { get; set; }
     public int GradosLibertad { get; set; }
+    public double ValorCritico { get; set; }
     public double PValor { get; set; }
     public double[,] FrecuenciasEsperadas { get; set; } = new double[0, 0];
     public double[,] DiferenciasRelativas { get; set; } = new double[0, 0];

@@ -100,7 +100,7 @@ Historial de commits (del más antiguo al más reciente):
 - **Página 2 — Módulo de inferencia** — Se agregó una segunda vista para pruebas de hipótesis, intervalos de confianza, predicción avanzada y diagnóstico de residuos.
 - **Servicios de negocio** — Se implementaron `DatosService` y `EstadisticaService` para separar carga y cálculo estadístico.
 - **Estilo visual base** — Se agregó una apariencia más coherente para el dashboard con tarjetas, métricas y un look más profesional.
-- **Verificación** — El proyecto compila correctamente con `dotnet build`.
+- **Verificación** — La implementación está lista, pero la validación de build no pudo completarse localmente debido a un fallo del entorno `dotnet` (`libhostfxr.so` no encontrado).
 
 #### Archivos principales del estado actual
 - **`Program.cs`** — Registra los servicios de datos y estadística.
@@ -230,6 +230,38 @@ Este avance es importante porque cubre los bloques centrales de la consigna: an�
 - La lógica estadística quedó más robusta ante casos límite y muestras reducidas.
 - Se reforzó la confiabilidad numérica de la regresión, los intervalos y la prueba chi-cuadrado.
 - La documentación refleja la verificación realizada sobre la parte estadística del dashboard.
+
+### Sesión 7 — 6 de agosto de 2026 (crítica de resultados y mejoras pendientes)
+
+#### Críticas detectadas:
+- La prueba de hipótesis chi-cuadrado no está suficientemente explicada en la interfaz: falta mostrar claramente el valor de prueba, el valor crítico y una interpretación más legible.
+- La pendiente de regresión lineal simple se muestra como `0` en algunos casos, lo que no refleja una relación real entre precio y cantidad.
+- La Página 2 queda corta para el público analista: requiere más desarrollo técnico y contenido inferencial en comparación con la Página 1.
+- Las interpretaciones de significancia usan `α` con muchos decimales, lo que reduce su claridad visual.
+- Hay un overflow en el nombre de archivo mostrado en la tarjeta del dashboard, lo que afecta la presentación.
+
+#### Acciones a seguir:
+1. Mejorar la presentación de la prueba chi-cuadrado en la Página 1 e Inferencia, mostrando valor de estadístico y valor crítico de forma clara.
+2. Revisar y corregir el cálculo de la pendiente de regresión para que la línea de tendencia represente la relación real del dataset.
+3. Ampliar la Página 2 con más análisis técnico: explicación de supuestos, interpretación de p-valores, intervalos de confianza para correlación y más contenido de diagnóstico.
+4. Redondear `α` a un formato de presentación legible (por ejemplo, 0.05, 0.10) en todas las descripciones.
+5. Ajustar la visualización del nombre de archivo para evitar overflow y mejorar la legibilidad del dashboard.
+
+### Sesión 8 — 6 de agosto de 2026 (actualización reciente)
+
+#### Prompt del usuario:
+> *"actualiza el contexto autogenerado"*
+
+#### Acciones realizadas:
+1. Se añadió información al documento sobre los cambios recientes en chi-cuadrado, regresión e inferencia.
+2. Se documentaron los ajustes hechos en `Home.razor`, `Inferencia.razor` y `wwwroot/css/app.css`.
+3. Se dejó constancia de la mejora en la presentación del valor crítico χ² y del intervalo de confianza de correlación.
+4. Se añadió una nota de bloqueo del entorno local: `dotnet --info` falla por falta de `libhostfxr.so`, lo que impide ejecutar el build en este entorno.
+
+#### Conclusiones de la sesión:
+- El documento de contexto se mantiene actualizado con el estado más reciente del desarrollo.
+- El proyecto ya incluye mayor detalle inferencial en ambas páginas y una presentación más completa de los resultados.
+- El bloqueo de build local se registra para que el próximo paso sea corregir el entorno antes de continuar la validación.
 
 ### Sesión 5 — 5 de agosto de 2026 (corrección de cálculos estadísticos)
 

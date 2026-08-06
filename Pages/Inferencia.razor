@@ -75,6 +75,29 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="row g-2 mt-3">
+                        <div class="col-4">
+                            <div class="metric-card">
+                                <div class="text-muted small">Estadístico χ²</div>
+                                <div class="fs-6 fw-semibold">@ChiResultado.Estadistico.ToString("0.00", CultureInfo.InvariantCulture)</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="metric-card">
+                                <div class="text-muted small">Valor crítico χ²</div>
+                                <div class="fs-6 fw-semibold">@ChiResultado.ValorCritico.ToString("0.00", CultureInfo.InvariantCulture)</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="metric-card">
+                                <div class="text-muted small">Grados de libertad</div>
+                                <div class="fs-6 fw-semibold">@ChiResultado.GradosLibertad</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-3 mb-1 fw-semibold">Interpretación</p>
+                    <p class="text-muted mb-0">@InterpretacionChi</p>
+                    <p class="text-muted mb-1">p-valor = @ChiResultado.PValor.ToString("0.0000", CultureInfo.InvariantCulture). Si p-valor < @alfaChi.ToString("0.00", CultureInfo.InvariantCulture), se rechaza H₀.</p>
                     <p class="mt-3 mb-1 fw-semibold">Supuestos</p>
                     <p class="text-muted mb-0">@ChiResultado.MensajeSupuestos</p>
                 </div>
@@ -102,6 +125,16 @@
                     </div>
                     <p class="mt-3 mb-1 fw-semibold">Conclusión detallada</p>
                     <p class="text-muted mb-0">@InterpretacionPruebaT</p>
+
+                    <label class="form-label mt-3">Precio para predicción</label>
+                    <input type="number" class="form-control mb-3" @bind="valorXPrediccion" min="0" step="100" />
+
+                    <p class="mt-2 mb-1 fw-semibold">Predicción con el modelo</p>
+                    <p class="text-muted mb-0">ŷ = @Regresion.B0.ToString("0.00", CultureInfo.InvariantCulture) @((Regresion.B1 >= 0) ? "+" : "-") @Math.Abs(Regresion.B1).ToString("0.000", CultureInfo.InvariantCulture) × Precio</p>
+                    <p class="text-muted mb-0">Intervalo de confianza de la media para Precio = @valorXPrediccion.ToString("0", CultureInfo.InvariantCulture): @ICMedia.limInf.ToString("0.00", CultureInfo.InvariantCulture) a @ICMedia.limSup.ToString("0.00", CultureInfo.InvariantCulture)</p>
+                    <p class="text-muted mb-0">Intervalo de predicción individual: @IPrediccion.limInf.ToString("0.00", CultureInfo.InvariantCulture) a @IPrediccion.limSup.ToString("0.00", CultureInfo.InvariantCulture)</p>
+                    <p class="text-muted mb-0">R² = @Regresion.R2.ToString("0.00", CultureInfo.InvariantCulture), lo que indica que una parte significativa de la variabilidad en cantidad se explica por el precio.</p>
+
                     <p class="mt-3 mb-1 fw-semibold">Intervalo de confianza para la pendiente</p>
                     <p class="text-muted mb-0">@ICPendiente.limInf.ToString("0.000", CultureInfo.InvariantCulture) a @ICPendiente.limSup.ToString("0.000", CultureInfo.InvariantCulture)</p>
                 </div>
@@ -111,23 +144,24 @@
         <div class="row g-4 mt-1">
             <div class="col-xl-6">
                 <div class="dashboard-card h-100">
-                    <h4 class="h5 fw-semibold mb-3">Predicción avanzada</h4>
-                    <label class="form-label">Valor de x (precio)</label>
-                    <input class="form-control" type="number" @bind="valorXPrediccion" />
-                    <div class="row g-2 mt-3">
+                    <h4 class="h5 fw-semibold mb-3">Intervalo de confianza del coeficiente r</h4>
+                    <p class="text-muted">Estimación del rango plausible de la correlación poblacional.</p>
+                    <div class="row g-2">
                         <div class="col-6">
                             <div class="metric-card">
-                                <div class="text-muted small">IC para la media</div>
-                                <div class="fs-6 fw-semibold">[@ICMedia.limInf.ToString("0.00", CultureInfo.InvariantCulture), @ICMedia.limSup.ToString("0.00", CultureInfo.InvariantCulture)]</div>
+                                <div class="text-muted small">Coeficiente r</div>
+                                <div class="fs-6 fw-semibold">@Regresion.R.ToString("0.000", CultureInfo.InvariantCulture)</div>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="metric-card">
-                                <div class="text-muted small">IP para una observación</div>
-                                <div class="fs-6 fw-semibold">[@IPrediccion.limInf.ToString("0.00", CultureInfo.InvariantCulture), @IPrediccion.limSup.ToString("0.00", CultureInfo.InvariantCulture)]</div>
+                                <div class="text-muted small">Intervalo para r</div>
+                                <div class="fs-6 fw-semibold">[@ICCorrelacion.limInf.ToString("0.000", CultureInfo.InvariantCulture), @ICCorrelacion.limSup.ToString("0.000", CultureInfo.InvariantCulture)]</div>
                             </div>
                         </div>
                     </div>
+                    <p class="mt-3 mb-1 fw-semibold">Interpretación</p>
+                    <p class="text-muted mb-0">@InterpretacionCorrelacionInferencia</p>
                 </div>
             </div>
 
@@ -196,10 +230,21 @@
         }
     }
 
+    private readonly double alfaChi = 0.05;
     private TablaContingenciaResult Tabla => EstadisticaService.CalcularTablaContingencia(DatosService.Ventas);
-    private ChiCuadradoResult ChiResultado => EstadisticaService.CalcularChiCuadrado(Tabla);
+    private ChiCuadradoResult ChiResultado => EstadisticaService.CalcularChiCuadrado(Tabla, alfaChi);
     private RegresionResult Regresion => EstadisticaService.CalcularRegresion(DatosService.Ventas);
+    private string InterpretacionChi => EstadisticaService.InterpretarChiCuadrado(ChiResultado, alfaChi);
+    private string InterpretacionCorrelacionInferencia => EstadisticaService.InterpretarCorrelacion(Regresion.R);
     private string InterpretacionPruebaT => EstadisticaService.InterpretarPruebaT(Regresion, 1 - (nivelConfianza / 100.0));
+
+    private (double limInf, double limSup) ICCorrelacion
+    {
+        get
+        {
+            return EstadisticaService.IntervaloConfianzaCorrelacion(Regresion.R, Regresion.N, nivelConfianza);
+        }
+    }
 
     private (double limInf, double limSup) ICPendiente
     {

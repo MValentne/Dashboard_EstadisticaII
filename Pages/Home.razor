@@ -31,7 +31,7 @@
         <div class="col-md-3">
             <div class="dashboard-card h-100">
                 <div class="text-muted small">Archivo</div>
-                <div class="fs-5 fw-semibold">@((!string.IsNullOrWhiteSpace(DatosService.NombreArchivo)) ? DatosService.NombreArchivo : "Sin cargar")</div>
+                <div class="fs-5 fw-semibold filename-truncate">@((!string.IsNullOrWhiteSpace(DatosService.NombreArchivo)) ? DatosService.NombreArchivo : "Sin cargar")</div>
             </div>
         </div>
         <div class="col-md-3">
@@ -131,16 +131,22 @@
                     <input type="range" class="form-range" min="0" max="30" step="1" @bind="alfaPercent" @bind:event="oninput" />
                     <div class="text-muted small mb-3">α = @alfaPercent.ToString("0", CultureInfo.InvariantCulture)%</div>
                     <div class="row g-2">
-                        <div class="col-6">
+                        <div class="col-4">
                             <div class="metric-card">
                                 <div class="text-muted small">Estadístico χ²</div>
                                 <div class="fs-5 fw-semibold">@ChiResultado.Estadistico.ToString("0.00", CultureInfo.InvariantCulture)</div>
                             </div>
                         </div>
-                        <div class="col-6">
+                        <div class="col-4">
                             <div class="metric-card">
-                                <div class="text-muted small">p-valor</div>
-                                <div class="fs-5 fw-semibold">@ChiResultado.PValor.ToString("0.0000", CultureInfo.InvariantCulture)</div>
+                                <div class="text-muted small">Valor crítico χ²</div>
+                                <div class="fs-5 fw-semibold">@ChiResultado.ValorCritico.ToString("0.00", CultureInfo.InvariantCulture)</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="metric-card">
+                                <div class="text-muted small">Grados de libertad</div>
+                                <div class="fs-5 fw-semibold">@ChiResultado.GradosLibertad</div>
                             </div>
                         </div>
                     </div>
@@ -204,7 +210,7 @@
                         <div class="col-6">
                             <div class="metric-card">
                                 <div class="text-muted small">Pendiente</div>
-                                <div class="fs-6 fw-semibold">@Regresion.B1.ToString("0.00", CultureInfo.InvariantCulture)</div>
+                                <div class="fs-6 fw-semibold">@Regresion.B1.ToString("0.000000", CultureInfo.InvariantCulture)</div>
                             </div>
                         </div>
                     </div>
@@ -340,7 +346,7 @@
     private List<string> ObtenerModos() => DatosService.Ventas.Select(v => v.ModoUso).Distinct().ToList();
 
     private TablaContingenciaResult Tabla => EstadisticaService.CalcularTablaContingencia(DatosService.Ventas);
-    private ChiCuadradoResult ChiResultado => EstadisticaService.CalcularChiCuadrado(Tabla);
+    private ChiCuadradoResult ChiResultado => EstadisticaService.CalcularChiCuadrado(Tabla, alfaCualitativo);
     private RegresionResult Regresion => EstadisticaService.CalcularRegresion(DatosService.Ventas);
 
     private string InterpretacionChi => EstadisticaService.InterpretarChiCuadrado(ChiResultado, alfaCualitativo);

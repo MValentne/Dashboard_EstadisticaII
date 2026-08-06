@@ -59,68 +59,71 @@ public class EstadisticaService
     /// Calcula el estadístico Chi-Cuadrado, frecuencias esperadas,
     /// diferencias relativas, p-valor y validación de supuestos.
     /// </summary>
-    public ChiCuadradoResult CalcularChiCuadrado(TablaContingenciaResult tabla)
+public ChiCuadradoResult CalcularChiCuadrado(TablaContingenciaResult tabla, double alfa = 0.05)
+{
+    if (tabla.Total <= 0)
     {
-        if (tabla.Total <= 0)
-        {
-            return new ChiCuadradoResult
-            {
-                Estadistico = 0,
-                GradosLibertad = 0,
-                PValor = 1.0,
-                FrecuenciasEsperadas = new double[0, 0],
-                DiferenciasRelativas = new double[0, 0],
-                CumpleSupuestos = false,
-                MensajeSupuestos = "⚠️ No hay datos suficientes para ejecutar la prueba chi-cuadrado."
-            };
-        }
-
-        int nF = tabla.Filas.Count;
-        int nC = tabla.Columnas.Count;
-        var esperadas = new double[nF, nC];
-        var difRelativas = new double[nF, nC];
-        double chi2 = 0;
-        int celdasBajas = 0;
-
-        for (int i = 0; i < nF; i++)
-        {
-            for (int j = 0; j < nC; j++)
-            {
-                // E_ij = (total_fila_i × total_col_j) / N
-                esperadas[i, j] = (double)tabla.MarginalesFila[i] * tabla.MarginalesColumna[j] / tabla.Total;
-
-                if (esperadas[i, j] > 0)
-                {
-                    double dif = tabla.Frecuencias[i, j] - esperadas[i, j];
-                    chi2 += (dif * dif) / esperadas[i, j];
-                    difRelativas[i, j] = dif / esperadas[i, j];
-                }
-
-                if (esperadas[i, j] < 5) celdasBajas++;
-            }
-        }
-
-        int gl = (nF - 1) * (nC - 1);
-        double pValor = gl > 0 ? 1.0 - ChiSquared.CDF(gl, chi2) : 1.0;
-
-        // Evaluar supuestos
-        int totalCeldas = nF * nC;
-        double propBajas = totalCeldas > 0 ? (double)celdasBajas / totalCeldas : 0;
-
-        string mensaje;
-        if (celdasBajas == 0)
-            mensaje = "✅ Todas las frecuencias esperadas son ≥ 5. La prueba es válida.";
-        else if (propBajas <= 0.20)
-            mensaje = $"⚠️ {celdasBajas} de {totalCeldas} celdas ({propBajas * 100:F0}%) tienen frecuencia esperada < 5. " +
-                      "La prueba es razonablemente robusta.";
-        else
-            mensaje = $"❌ {celdasBajas} de {totalCeldas} celdas ({propBajas * 100:F0}%) tienen frecuencia esperada < 5. " +
-                      "La prueba puede no ser confiable. Considere combinar categorías.";
-
         return new ChiCuadradoResult
         {
-            Estadistico = chi2,
-            GradosLibertad = gl,
+            Estadistico = 0,
+            GradosLibertad = 0,
+            ValorCritico = 0,
+            PValor = 1.0,
+            FrecuenciasEsperadas = new double[0, 0],
+            DiferenciasRelativas = new double[0, 0],
+            CumpleSupuestos = false,
+            MensajeSupuestos = "⚠️ No hay datos suficientes para ejecutar la prueba chi-cuadrado."
+        };
+    }
+
+    int nF = tabla.Filas.Count;
+    int nC = tabla.Columnas.Count;
+    var esperadas = new double[nF, nC];
+    var difRelativas = new double[nF, nC];
+    double chi2 = 0;
+    int celdasBajas = 0;
+
+    for (int i = 0; i < nF; i++)
+    {
+        for (int j = 0; j < nC; j++)
+        {
+            // E_ij = (total_fila_i × total_col_j) / N
+            esperadas[i, j] = (double)tabla.MarginalesFila[i] * tabla.MarginalesColumna[j] / tabla.Total;
+
+            if (esperadas[i, j] > 0)
+            {
+                double dif = tabla.Frecuencias[i, j] - esperadas[i, j];
+                chi2 += (dif * dif) / esperadas[i, j];
+                difRelativas[i, j] = dif / esperadas[i, j];
+            }
+
+            if (esperadas[i, j] < 5) celdasBajas++;
+        }
+    }
+
+    int gl = (nF - 1) * (nC - 1);
+    double pValor = gl > 0 ? 1.0 - ChiSquared.CDF(gl, chi2) : 1.0;
+    double valorCritico = gl > 0 ? ChiSquared.InvCDF(gl, 1.0 - alfa) : 0;
+
+    // Evaluar supuestos
+    int totalCeldas = nF * nC;
+    double propBajas = totalCeldas > 0 ? (double)celdasBajas / totalCeldas : 0;
+
+    string mensaje;
+    if (celdasBajas == 0)
+        mensaje = "✅ Todas las frecuencias esperadas son ≥ 5. La prueba se puede interpretar con confianza.";
+    else if (propBajas <= 0.20)
+        mensaje = $"⚠️ {celdasBajas} de {totalCeldas} celdas ({propBajas * 100:F0}%) tienen frecuencia esperada < 5. " +
+                  "La prueba puede ser razonablemente robusta, pero conviene interpretar con cautela.";
+    else
+        mensaje = $"❌ {celdasBajas} de {totalCeldas} celdas ({propBajas * 100:F0}%) tienen frecuencia esperada < 5. " +
+                  "La prueba puede no ser confiable. Considere combinar categorías.";
+
+    return new ChiCuadradoResult
+    {
+        Estadistico = chi2,
+        GradosLibertad = gl,
+        ValorCritico = valorCritico,
             PValor = pValor,
             FrecuenciasEsperadas = esperadas,
             DiferenciasRelativas = difRelativas,
@@ -381,8 +384,8 @@ public class EstadisticaService
     {
         bool rechaza = reg.PValorT < alfa;
         string decision = rechaza
-            ? $"Se rechaza H₀ al nivel α = {alfa}."
-            : $"No se rechaza H₀ al nivel α = {alfa}.";
+            ? $"Se rechaza H₀ al nivel α = {alfa:0.00}."
+            : $"No se rechaza H₀ al nivel α = {alfa:0.00}.";
 
         string conclusion = rechaza
             ? "Existe evidencia estadística suficiente para sostener que la pendiente del modelo es distinta de cero."
@@ -395,8 +398,8 @@ public class EstadisticaService
     {
         bool rechaza = chi2.PValor < alfa;
         string decision = rechaza
-            ? $"Se rechaza H₀ al nivel α = {alfa:F2}."
-            : $"No se rechaza H₀ al nivel α = {alfa:F2}.";
+            ? $"Se rechaza H₀ al nivel α = {alfa:0.00}."
+            : $"No se rechaza H₀ al nivel α = {alfa:0.00}.";
 
         string conclusion = rechaza
             ? "Existe evidencia estadística suficiente para afirmar que la distribución de modo de uso cambia entre zonas."
