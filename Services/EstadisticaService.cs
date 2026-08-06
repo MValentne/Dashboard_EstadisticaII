@@ -366,15 +366,15 @@ public class EstadisticaService
         };
 
         return $"Correlación lineal {fuerza} y {direccion}. " +
-               $"A medida que el precio de venta varía, la cantidad de ventas " +
-               $"tiende a {(r >= 0 ? "aumentar" : "disminuir")} {(absR >= 0.5 ? "notablemente" : "levemente")}.";
+               $"En este conjunto, los cambios en el precio acompañan cambios en la cantidad vendida " +
+               $"de forma {(absR >= 0.5 ? "visible" : "leve")}.";
     }
 
     public string InterpretarR2(double r2)
     {
         return $"El {r2 * 100:F1}% de la variabilidad observada en la cantidad de ventas " +
-               $"es explicada por la relación lineal con el precio de venta. " +
-               $"El {(1 - r2) * 100:F1}% restante se debe a otros factores.";
+               $"se asocia con la relación lineal con el precio. " +
+               $"El {(1 - r2) * 100:F1}% restante puede deberse a otros factores no incluidos en este modelo.";
     }
 
     public string InterpretarPruebaT(RegresionResult reg, double alfa)
@@ -385,10 +385,8 @@ public class EstadisticaService
             : $"No se rechaza H₀ al nivel α = {alfa}.";
 
         string conclusion = rechaza
-            ? "Existe evidencia estadística suficiente para afirmar que el precio de venta " +
-              "influye significativamente sobre la cantidad de ventas a nivel poblacional."
-            : "No hay evidencia estadística suficiente para afirmar que el precio de venta " +
-              "influye significativamente sobre la cantidad de ventas a nivel poblacional.";
+            ? "Existe evidencia estadística suficiente para sostener que la pendiente del modelo es distinta de cero."
+            : "No hay evidencia suficiente para afirmar que la pendiente del modelo sea distinta de cero.";
 
         return $"{decision} {conclusion}";
     }
@@ -401,11 +399,8 @@ public class EstadisticaService
             : $"No se rechaza H₀ al nivel α = {alfa:F2}.";
 
         string conclusion = rechaza
-            ? "Existe evidencia estadística suficiente para afirmar que las variables " +
-              "Sucursal/Zona y Modo de Uso NO son independientes en la población. " +
-              "El modo de uso de los monopatines está asociado a la zona de venta."
-            : "No hay evidencia estadística suficiente para afirmar que las variables " +
-              "Sucursal/Zona y Modo de Uso estén asociadas. Podrían ser independientes.";
+            ? "Existe evidencia estadística suficiente para afirmar que la distribución de modo de uso cambia entre zonas."
+            : "No hay evidencia suficiente para afirmar que la distribución de modo de uso cambie entre zonas.";
 
         return $"{decision} {conclusion}";
     }
