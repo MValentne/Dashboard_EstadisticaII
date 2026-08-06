@@ -20,20 +20,41 @@ public class DatosService
 
     public void CargarDatosEjemplo()
     {
-        Ventas = new List<Venta>
+        var zonas = new[] { "Córdoba Capital", "Zona Limítrofe", "Ciudades Medias" };
+        var modos = new[] { "Transporte principal", "Distancias cortas", "Entretenimiento" };
+        var preciosBase = new Dictionary<string, decimal>
         {
-            new() { Zona = "Córdoba Capital", ModoUso = "Transporte principal", Precio = 1250000m, Cantidad = 48 },
-            new() { Zona = "Zona Limítrofe", ModoUso = "Distancias cortas", Precio = 980000m, Cantidad = 35 },
-            new() { Zona = "Ciudades Medias", ModoUso = "Entretenimiento", Precio = 760000m, Cantidad = 22 },
-            new() { Zona = "Córdoba Capital", ModoUso = "Distancias cortas", Precio = 1180000m, Cantidad = 41 },
-            new() { Zona = "Zona Limítrofe", ModoUso = "Transporte principal", Precio = 1320000m, Cantidad = 29 },
-            new() { Zona = "Ciudades Medias", ModoUso = "Distancias cortas", Precio = 890000m, Cantidad = 31 },
-            new() { Zona = "Córdoba Capital", ModoUso = "Entretenimiento", Precio = 840000m, Cantidad = 19 },
-            new() { Zona = "Zona Limítrofe", ModoUso = "Distancias cortas", Precio = 950000m, Cantidad = 27 },
-            new() { Zona = "Ciudades Medias", ModoUso = "Transporte principal", Precio = 1110000m, Cantidad = 33 },
-            new() { Zona = "Córdoba Capital", ModoUso = "Distancias cortas", Precio = 1060000m, Cantidad = 38 }
+            ["Córdoba Capital"] = 1200000m,
+            ["Zona Limítrofe"] = 980000m,
+            ["Ciudades Medias"] = 860000m
+        };
+        var cantidadesBase = new Dictionary<string, int>
+        {
+            ["Transporte principal"] = 30,
+            ["Distancias cortas"] = 24,
+            ["Entretenimiento"] = 18
         };
 
+        var ventas = new List<Venta>();
+        for (int i = 0; i < 50; i++)
+        {
+            var zona = zonas[i % zonas.Length];
+            var modo = modos[(i / 3) % modos.Length];
+            var variacionPrecio = (i % 6) * 35000m + ((i / 6) % 4) * 18000m;
+            var variacionCantidad = ((i % 5) - 2) * 2;
+            var precio = preciosBase[zona] + variacionPrecio + (modo == "Transporte principal" ? 60000m : 0m);
+            var cantidad = cantidadesBase[modo] + (int)Math.Round(precio / 50000m) - 20 + variacionCantidad;
+
+            ventas.Add(new Venta
+            {
+                Zona = zona,
+                ModoUso = modo,
+                Precio = Math.Max(700000m, precio),
+                Cantidad = Math.Clamp(cantidad, 12, 60)
+            });
+        }
+
+        Ventas = ventas;
         ErrorMensaje = null;
         NombreArchivo = "datos-ejemplo.csv";
         OnDatosChanged?.Invoke();

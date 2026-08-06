@@ -137,11 +137,16 @@
                     <svg viewBox="0 0 420 260" class="chart-svg">
                         <line x1="30" y1="220" x2="390" y2="220" stroke="#6c757d" stroke-width="1"></line>
                         <line x1="30" y1="20" x2="30" y2="220" stroke="#6c757d" stroke-width="1"></line>
+                        <line x1="30" y1="110" x2="390" y2="110" stroke="#adb5bd" stroke-dasharray="4 4"></line>
                         @foreach (var punto in PuntosResiduos)
                         {
                             <circle cx="@punto.X" cy="@punto.Y" r="4" fill="#198754"></circle>
                         }
                     </svg>
+                    <div class="small text-muted mt-3">
+                        <div><strong>Eje X:</strong> valores ajustados (estimados)</div>
+                        <div><strong>Eje Y:</strong> residuos, línea gris = referencia en cero</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -153,11 +158,16 @@
                     <svg viewBox="0 0 420 260" class="chart-svg">
                         <line x1="30" y1="220" x2="390" y2="220" stroke="#6c757d" stroke-width="1"></line>
                         <line x1="30" y1="20" x2="30" y2="220" stroke="#6c757d" stroke-width="1"></line>
+                        <line x1="30" y1="220" x2="390" y2="20" stroke="#adb5bd" stroke-dasharray="4 4"></line>
                         @foreach (var punto in PuntosQQ)
                         {
                             <circle cx="@punto.X" cy="@punto.Y" r="4" fill="#dc3545"></circle>
                         }
                     </svg>
+                    <div class="small text-muted mt-3">
+                        <div><strong>Eje X:</strong> cuantiles teóricos de la normal</div>
+                        <div><strong>Eje Y:</strong> cuantiles observados de los residuos</div>
+                    </div>
                 </div>
             </div>
         </div>
