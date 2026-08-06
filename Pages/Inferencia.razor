@@ -1,0 +1,271 @@
+@page "/inferencia"
+@using DashboardEstadisticaII.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Globalization
+@inject DashboardEstadisticaII.Services.DatosService DatosService
+@inject DashboardEstadisticaII.Services.EstadisticaService EstadisticaService
+
+<PageTitle>Inferencia estadística</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-lg-8">
+            <h1 class="fw-bold mb-2">Módulo de inferencia</h1>
+            <p class="text-muted mb-0">Pruebas de hipótesis, intervalos de confianza, predicción y diagnóstico de residuos para el equipo técnico.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <label class="btn btn-primary mb-0">
+                Cargar archivo CSV/XLSX
+                <InputFile OnChange="OnArchivoSeleccionado" accept=".csv,.xlsx,.xls" class="d-none" />
+            </label>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(DatosService.ErrorMensaje))
+    {
+        <div class="alert alert-warning" role="alert">@DatosService.ErrorMensaje</div>
+    }
+
+    @if (!DatosService.DatosCargados)
+    {
+        <div class="dashboard-card text-center py-5">
+            <h5 class="mb-3">No hay datos cargados</h5>
+            <p class="text-muted mb-0">Cargue un dataset válido para visualizar la inferencia estadística.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <div class="col-xl-6">
+                <div class="dashboard-card h-100">
+                    <h4 class="h5 fw-semibold mb-3">Prueba de independencia / homogeneidad</h4>
+                    <p class="text-muted">Se evalúa si la distribución de Modo de Uso difiere entre las zonas.</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    @foreach (var col in Tabla.Columnas)
+                                    {
+                                        <th>@col</th>
+                                    }
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Tabla.Filas.Count; i++)
+                                {
+                                    <tr>
+                                        <th>@Tabla.Filas[i]</th>
+                                        @for (int j = 0; j < Tabla.Columnas.Count; j++)
+                                        {
+                                            <td>@ChiResultado.FrecuenciasEsperadas[i, j].ToString("0.00", CultureInfo.InvariantCulture)</td>
+                                        }
+                                        <td class="fw-semibold">@Tabla.MarginalesFila[i]</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <th>Total</th>
+                                    @for (int j = 0; j < Tabla.Columnas.Count; j++)
+                                    {
+                                        <td class="fw-semibold">@Tabla.MarginalesColumna[j]</td>
+                                    }
+                                    <td class="fw-semibold">@Tabla.Total</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="mt-3 mb-1 fw-semibold">Supuestos</p>
+                    <p class="text-muted mb-0">@ChiResultado.MensajeSupuestos</p>
+                </div>
+            </div>
+
+            <div class="col-xl-6">
+                <div class="dashboard-card h-100">
+                    <h4 class="h5 fw-semibold mb-3">Prueba t para la pendiente</h4>
+                    <label class="form-label">Nivel de confianza</label>
+                    <input type="range" class="form-range" min="90" max="99" step="1" @bind="nivelConfianza" @bind:event="oninput" />
+                    <div class="text-muted small mb-3">@nivelConfianza% de confianza</div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="metric-card">
+                                <div class="text-muted small">t</div>
+                                <div class="fs-5 fw-semibold">@Regresion.EstadisticoT.ToString("0.000", CultureInfo.InvariantCulture)</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-card">
+                                <div class="text-muted small">p-valor</div>
+                                <div class="fs-5 fw-semibold">@Regresion.PValorT.ToString("0.0000", CultureInfo.InvariantCulture)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-3 mb-1 fw-semibold">Conclusión</p>
+                    <p class="text-muted mb-0">@InterpretacionPruebaT</p>
+                    <p class="mt-3 mb-1 fw-semibold">Intervalo de confianza para la pendiente</p>
+                    <p class="text-muted mb-0">@ICPendiente.limInf.ToString("0.000", CultureInfo.InvariantCulture) a @ICPendiente.limSup.ToString("0.000", CultureInfo.InvariantCulture)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-xl-6">
+                <div class="dashboard-card h-100">
+                    <h4 class="h5 fw-semibold mb-3">Predicción avanzada</h4>
+                    <label class="form-label">Valor de x (precio)</label>
+                    <input class="form-control" type="number" @bind="valorXPrediccion" />
+                    <div class="row g-2 mt-3">
+                        <div class="col-6">
+                            <div class="metric-card">
+                                <div class="text-muted small">IC para la media</div>
+                                <div class="fs-6 fw-semibold">[@ICMedia.limInf.ToString("0.00", CultureInfo.InvariantCulture), @ICMedia.limSup.ToString("0.00", CultureInfo.InvariantCulture)]</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-card">
+                                <div class="text-muted small">IP para una observación</div>
+                                <div class="fs-6 fw-semibold">[@IPrediccion.limInf.ToString("0.00", CultureInfo.InvariantCulture), @IPrediccion.limSup.ToString("0.00", CultureInfo.InvariantCulture)]</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-6">
+                <div class="dashboard-card h-100">
+                    <h4 class="h5 fw-semibold mb-3">Diagnóstico de residuos</h4>
+                    <svg viewBox="0 0 420 260" class="chart-svg">
+                        <line x1="30" y1="220" x2="390" y2="220" stroke="#6c757d" stroke-width="1"></line>
+                        <line x1="30" y1="20" x2="30" y2="220" stroke="#6c757d" stroke-width="1"></line>
+                        @foreach (var punto in PuntosResiduos)
+                        {
+                            <circle cx="@punto.X" cy="@punto.Y" r="4" fill="#198754"></circle>
+                        }
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-12">
+                <div class="dashboard-card">
+                    <h4 class="h5 fw-semibold mb-3">Q-Q Plot de residuos</h4>
+                    <svg viewBox="0 0 420 260" class="chart-svg">
+                        <line x1="30" y1="220" x2="390" y2="220" stroke="#6c757d" stroke-width="1"></line>
+                        <line x1="30" y1="20" x2="30" y2="220" stroke="#6c757d" stroke-width="1"></line>
+                        @foreach (var punto in PuntosQQ)
+                        {
+                            <circle cx="@punto.X" cy="@punto.Y" r="4" fill="#dc3545"></circle>
+                        }
+                    </svg>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private int nivelConfianza = 95;
+    private double valorXPrediccion = 1000000;
+
+    protected override void OnInitialized()
+    {
+        DatosService.OnDatosChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        DatosService.OnDatosChanged -= StateHasChanged;
+    }
+
+    private async Task OnArchivoSeleccionado(InputFileChangeEventArgs e)
+    {
+        if (e.File is not null)
+        {
+            await DatosService.CargarArchivo(e.File);
+        }
+    }
+
+    private TablaContingenciaResult Tabla => EstadisticaService.CalcularTablaContingencia(DatosService.Ventas);
+    private ChiCuadradoResult ChiResultado => EstadisticaService.CalcularChiCuadrado(Tabla);
+    private RegresionResult Regresion => EstadisticaService.CalcularRegresion(DatosService.Ventas);
+    private string InterpretacionPruebaT => EstadisticaService.InterpretarPruebaT(Regresion, 1 - (nivelConfianza / 100.0));
+
+    private (double limInf, double limSup) ICPendiente
+    {
+        get
+        {
+            var resultado = EstadisticaService.IntervaloConfianza(Regresion.B1, Regresion.ErrorEstandarB1, Regresion.GradosLibertad, nivelConfianza);
+            return (resultado.limInf, resultado.limSup);
+        }
+    }
+
+    private (double limInf, double limSup) ICMedia
+    {
+        get
+        {
+            var resultado = EstadisticaService.IntervaloConfianzaMedia(Regresion, valorXPrediccion, nivelConfianza);
+            return (resultado.limInf, resultado.limSup);
+        }
+    }
+
+    private (double limInf, double limSup) IPrediccion
+    {
+        get
+        {
+            var resultado = EstadisticaService.IntervaloPrediccion(Regresion, valorXPrediccion, nivelConfianza);
+            return (resultado.limInf, resultado.limSup);
+        }
+    }
+
+    private List<(string X, string Y)> PuntosResiduos
+    {
+        get
+        {
+            var puntos = new List<(string X, string Y)>();
+            if (Regresion.ValoresAjustados.Count == 0) return puntos;
+
+            double minX = Regresion.ValoresAjustados.Min();
+            double maxX = Regresion.ValoresAjustados.Max();
+            double minY = Regresion.Residuos.Min();
+            double maxY = Regresion.Residuos.Max();
+            double spanX = Math.Max(1, maxX - minX);
+            double spanY = Math.Max(1, maxY - minY);
+
+            for (int i = 0; i < Regresion.ValoresAjustados.Count; i++)
+            {
+                double x = 30 + ((Regresion.ValoresAjustados[i] - minX) / spanX) * 360;
+                double y = 220 - ((Regresion.Residuos[i] - minY) / spanY) * 200;
+                puntos.Add((x.ToString(CultureInfo.InvariantCulture), y.ToString(CultureInfo.InvariantCulture)));
+            }
+
+            return puntos;
+        }
+    }
+
+    private List<(string X, string Y)> PuntosQQ
+    {
+        get
+        {
+            var puntos = new List<(string X, string Y)>();
+            var qq = EstadisticaService.CalcularQQPlot(Regresion.Residuos);
+            if (qq.Count == 0) return puntos;
+
+            double minX = qq.Min(p => (double)p.X);
+            double maxX = qq.Max(p => (double)p.X);
+            double minY = qq.Min(p => (double)p.Y);
+            double maxY = qq.Max(p => (double)p.Y);
+            double spanX = Math.Max(1, maxX - minX);
+            double spanY = Math.Max(1, maxY - minY);
+
+            foreach (var punto in qq)
+            {
+                double x = 30 + (((double)punto.X - minX) / spanX) * 360;
+                double y = 220 - (((double)punto.Y - minY) / spanY) * 200;
+                puntos.Add((x.ToString(CultureInfo.InvariantCulture), y.ToString(CultureInfo.InvariantCulture)));
+            }
+
+            return puntos;
+        }
+    }
+}
