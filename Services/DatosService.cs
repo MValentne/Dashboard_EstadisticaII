@@ -18,6 +18,27 @@ public class DatosService
     /// <summary>Se dispara cuando los datos cambian (archivo nuevo cargado).</summary>
     public event Action? OnDatosChanged;
 
+    public void CargarDatosEjemplo()
+    {
+        Ventas = new List<Venta>
+        {
+            new() { Zona = "Córdoba Capital", ModoUso = "Transporte principal", Precio = 1250000m, Cantidad = 48 },
+            new() { Zona = "Zona Limítrofe", ModoUso = "Distancias cortas", Precio = 980000m, Cantidad = 35 },
+            new() { Zona = "Ciudades Medias", ModoUso = "Entretenimiento", Precio = 760000m, Cantidad = 22 },
+            new() { Zona = "Córdoba Capital", ModoUso = "Distancias cortas", Precio = 1180000m, Cantidad = 41 },
+            new() { Zona = "Zona Limítrofe", ModoUso = "Transporte principal", Precio = 1320000m, Cantidad = 29 },
+            new() { Zona = "Ciudades Medias", ModoUso = "Distancias cortas", Precio = 890000m, Cantidad = 31 },
+            new() { Zona = "Córdoba Capital", ModoUso = "Entretenimiento", Precio = 840000m, Cantidad = 19 },
+            new() { Zona = "Zona Limítrofe", ModoUso = "Distancias cortas", Precio = 950000m, Cantidad = 27 },
+            new() { Zona = "Ciudades Medias", ModoUso = "Transporte principal", Precio = 1110000m, Cantidad = 33 },
+            new() { Zona = "Córdoba Capital", ModoUso = "Distancias cortas", Precio = 1060000m, Cantidad = 38 }
+        };
+
+        ErrorMensaje = null;
+        NombreArchivo = "datos-ejemplo.csv";
+        OnDatosChanged?.Invoke();
+    }
+
     /// <summary>
     /// Carga un archivo CSV o XLSX desde el componente InputFile.
     /// </summary>

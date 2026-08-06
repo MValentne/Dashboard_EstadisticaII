@@ -1,7 +1,462 @@
 ﻿@page "/"
+@using DashboardEstadisticaII.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Globalization
+@inject DashboardEstadisticaII.Services.DatosService DatosService
+@inject DashboardEstadisticaII.Services.EstadisticaService EstadisticaService
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Dashboard Estadístico Voltio</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container-fluid py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-lg-8">
+            <h1 class="fw-bold mb-2">Dashboard estadístico de Monopatines Voltio</h1>
+            <p class="text-muted mb-0">Análisis descriptivo e inferencial sobre ventas, zonas y modos de uso para el equipo gerencial y técnico.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <button class="btn btn-outline-secondary me-2" @onclick="CargarEjemplo">Usar datos de ejemplo</button>
+            <label class="btn btn-primary mb-0">
+                Cargar archivo CSV/XLSX
+                <InputFile OnChange="OnArchivoSeleccionado" accept=".csv,.xlsx,.xls" class="d-none" />
+            </label>
+        </div>
+    </div>
 
-Welcome to your new app.
+    @if (!string.IsNullOrWhiteSpace(DatosService.ErrorMensaje))
+    {
+        <div class="alert alert-warning" role="alert">@DatosService.ErrorMensaje</div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="dashboard-card h-100">
+                <div class="text-muted small">Archivo</div>
+                <div class="fs-5 fw-semibold">@((!string.IsNullOrWhiteSpace(DatosService.NombreArchivo)) ? DatosService.NombreArchivo : "Sin cargar")</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dashboard-card h-100">
+                <div class="text-muted small">Observaciones</div>
+                <div class="fs-5 fw-semibold">@DatosService.Ventas.Count</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dashboard-card h-100">
+                <div class="text-muted small">Zonas registradas</div>
+                <div class="fs-5 fw-semibold">@ObtenerZonas().Count</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dashboard-card h-100">
+                <div class="text-muted small">Modos de uso</div>
+                <div class="fs-5 fw-semibold">@ObtenerModos().Count</div>
+            </div>
+        </div>
+    </div>
+
+    @if (!DatosService.DatosCargados)
+    {
+        <div class="dashboard-card text-center py-5">
+            <h5 class="mb-3">Aún no hay datos cargados</h5>
+            <p class="text-muted mb-0">Suba un archivo CSV o Excel con las columnas Zona, ModoUso, Precio y Cantidad para comenzar.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <div class="col-xl-7">
+                <div class="dashboard-card h-100">
+                    <h4 class="h5 fw-semibold mb-3">Módulo descriptivo</h4>
+                    <p class="text-muted">Análisis visual de asociación entre zona y modo de uso.</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Zonas</th>
+                                    @foreach (var col in Tabla.Columnas)
+                                    {
+                                        <th>@col</th>
+                                    }
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Tabla.Filas.Count; i++)
+                                {
+                                    <tr>
+                                        <th>@Tabla.Filas[i]</th>
+                                        @for (int j = 0; j < Tabla.Columnas.Count; j++)
+                                        {
+                                            <td>@Tabla.Frecuencias[i, j]</td>
+                                        }
+                                        <td class="fw-semibold">@Tabla.MarginalesFila[i]</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <th>Total</th>
+                                    @for (int j = 0; j < Tabla.Columnas.Count; j++)
+                                    {
+                                        <td class="fw-semibold">@Tabla.MarginalesColumna[j]</td>
+                                    }
+                                    <td class="fw-semibold">@Tabla.Total</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4">
+                        <h6 class="fw-semibold">Distribución por zona</h6>
+                        <div class="d-flex flex-column gap-2">
+                            @foreach (var fila in ObtenerBarrasPorFila())
+                            {
+                                <div>
+                                    <div class="d-flex justify-content-between small mb-1">
+                                        <span>@fila.Label</span>
+                                        <span>@fila.Value</span>
+                                    </div>
+                                    <div class="bar-track">
+                                        <div class="bar-fill" style="width:@((fila.Value / Math.Max(1, Tabla.Total) * 100).ToString("0", CultureInfo.InvariantCulture))%"></div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-5">
+                <div class="dashboard-card h-100">
+                    <h4 class="h5 fw-semibold mb-3">Prueba chi-cuadrado</h4>
+                    <label class="form-label">Nivel de significación α</label>
+                    <input type="range" class="form-range" min="0.01" max="0.10" step="0.01" @bind="alfaCualitativo" @bind:event="oninput" />
+                    <div class="text-muted small mb-3">α = @alfaCualitativo.ToString("0.00", CultureInfo.InvariantCulture)</div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="metric-card">
+                                <div class="text-muted small">Estadístico χ²</div>
+                                <div class="fs-5 fw-semibold">@ChiResultado.Estadistico.ToString("0.00", CultureInfo.InvariantCulture)</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-card">
+                                <div class="text-muted small">p-valor</div>
+                                <div class="fs-5 fw-semibold">@ChiResultado.PValor.ToString("0.0000", CultureInfo.InvariantCulture)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-3 mb-1 fw-semibold">Interpretación</p>
+                    <p class="text-muted mb-0">@InterpretacionChi</p>
+                    <p class="mt-3 mb-1 fw-semibold">Supuestos</p>
+                    <p class="text-muted mb-0">@ChiResultado.MensajeSupuestos</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-xl-7">
+                <div class="dashboard-card h-100">
+                    <h4 class="h5 fw-semibold mb-3">Relación lineal: precio vs. cantidad</h4>
+                    <svg viewBox="0 0 420 260" class="chart-svg">
+                        <line x1="30" y1="220" x2="390" y2="220" stroke="#6c757d" stroke-width="1"></line>
+                        <line x1="30" y1="20" x2="30" y2="220" stroke="#6c757d" stroke-width="1"></line>
+                        @foreach (var punto in PuntosDispersion)
+                        {
+                            <circle cx="@punto.X" cy="@punto.Y" r="5" fill="#0d6efd"></circle>
+                        }
+                        @if (PuntosRegresion.Count > 1)
+                        {
+                            <line x1="@PuntosRegresion[0].X" y1="@PuntosRegresion[0].Y" x2="@PuntosRegresion[^1].X" y2="@PuntosRegresion[^1].Y" stroke="#ff6b35" stroke-width="2"></line>
+                        }
+                    </svg>
+                    <div class="row g-2 mt-3">
+                        <div class="col-6">
+                            <div class="metric-card">
+                                <div class="text-muted small">Coeficiente r</div>
+                                <div class="fs-5 fw-semibold">@Regresion.R.ToString("0.000", CultureInfo.InvariantCulture)</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-card">
+                                <div class="text-muted small">R²</div>
+                                <div class="fs-5 fw-semibold">@Regresion.R2.ToString("0.000", CultureInfo.InvariantCulture)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-3 mb-0 text-muted">@InterpretacionCorrelacion</p>
+                </div>
+            </div>
+
+            <div class="col-xl-5">
+                <div class="dashboard-card h-100">
+                    <h4 class="h5 fw-semibold mb-3">Regresión lineal simple</h4>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="metric-card">
+                                <div class="text-muted small">Ordenada al origen</div>
+                                <div class="fs-6 fw-semibold">@Regresion.B0.ToString("0.00", CultureInfo.InvariantCulture)</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-card">
+                                <div class="text-muted small">Pendiente</div>
+                                <div class="fs-6 fw-semibold">@Regresion.B1.ToString("0.00", CultureInfo.InvariantCulture)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-3 mb-1 fw-semibold">Ecuación estimada</p>
+                    <p class="text-muted mb-0">ŷ = @Regresion.B0.ToString("0.00", CultureInfo.InvariantCulture) + @Regresion.B1.ToString("0.00", CultureInfo.InvariantCulture) · x</p>
+                    <p class="mt-3 mb-1 fw-semibold">Interpretación R²</p>
+                    <p class="text-muted mb-0">@InterpretacionR2</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-xl-6">
+                <div class="dashboard-card h-100">
+                    <h4 class="h5 fw-semibold mb-3">Inferencia para la pendiente</h4>
+                    <label class="form-label">Nivel de confianza</label>
+                    <input type="range" class="form-range" min="90" max="99" step="1" @bind="nivelConfianza" @bind:event="oninput" />
+                    <div class="text-muted small mb-3">@nivelConfianza% de confianza</div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="metric-card">
+                                <div class="text-muted small">t</div>
+                                <div class="fs-5 fw-semibold">@Regresion.EstadisticoT.ToString("0.000", CultureInfo.InvariantCulture)</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-card">
+                                <div class="text-muted small">p-valor</div>
+                                <div class="fs-5 fw-semibold">@Regresion.PValorT.ToString("0.0000", CultureInfo.InvariantCulture)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-3 mb-1 fw-semibold">Conclusión</p>
+                    <p class="text-muted mb-0">@InterpretacionPruebaT</p>
+                </div>
+            </div>
+
+            <div class="col-xl-6">
+                <div class="dashboard-card h-100">
+                    <h4 class="h5 fw-semibold mb-3">Predicción avanzada</h4>
+                    <label class="form-label">Valor de x (precio)</label>
+                    <input class="form-control" type="number" @bind="valorXPrediccion" />
+                    <div class="row g-2 mt-3">
+                        <div class="col-6">
+                            <div class="metric-card">
+                                <div class="text-muted small">IC para media</div>
+                                <div class="fs-6 fw-semibold">[@ICMedia.limInf.ToString("0.00", CultureInfo.InvariantCulture), @ICMedia.limSup.ToString("0.00", CultureInfo.InvariantCulture)]</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-card">
+                                <div class="text-muted small">IP para observación</div>
+                                <div class="fs-6 fw-semibold">[@IPrediccion.limInf.ToString("0.00", CultureInfo.InvariantCulture), @IPrediccion.limSup.ToString("0.00", CultureInfo.InvariantCulture)]</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-xl-6">
+                <div class="dashboard-card h-100">
+                    <h4 class="h5 fw-semibold mb-3">Residuos vs. valores ajustados</h4>
+                    <svg viewBox="0 0 420 260" class="chart-svg">
+                        <line x1="30" y1="220" x2="390" y2="220" stroke="#6c757d" stroke-width="1"></line>
+                        <line x1="30" y1="20" x2="30" y2="220" stroke="#6c757d" stroke-width="1"></line>
+                        @foreach (var punto in PuntosResiduos)
+                        {
+                            <circle cx="@punto.X" cy="@punto.Y" r="4" fill="#198754"></circle>
+                        }
+                    </svg>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="dashboard-card h-100">
+                    <h4 class="h5 fw-semibold mb-3">Q-Q Plot de residuos</h4>
+                    <svg viewBox="0 0 420 260" class="chart-svg">
+                        <line x1="30" y1="220" x2="390" y2="220" stroke="#6c757d" stroke-width="1"></line>
+                        <line x1="30" y1="20" x2="30" y2="220" stroke="#6c757d" stroke-width="1"></line>
+                        @foreach (var punto in PuntosQQ)
+                        {
+                            <circle cx="@punto.X" cy="@punto.Y" r="4" fill="#dc3545"></circle>
+                        }
+                    </svg>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private double alfaCualitativo = 0.05;
+    private int nivelConfianza = 95;
+    private double valorXPrediccion = 1000000;
+
+    protected override void OnInitialized()
+    {
+        DatosService.OnDatosChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        DatosService.OnDatosChanged -= StateHasChanged;
+    }
+
+    private async Task OnArchivoSeleccionado(InputFileChangeEventArgs e)
+    {
+        if (e.File is not null)
+        {
+            await DatosService.CargarArchivo(e.File);
+        }
+    }
+
+    private void CargarEjemplo()
+    {
+        DatosService.CargarDatosEjemplo();
+    }
+
+    private List<string> ObtenerZonas() => DatosService.Ventas.Select(v => v.Zona).Distinct().ToList();
+    private List<string> ObtenerModos() => DatosService.Ventas.Select(v => v.ModoUso).Distinct().ToList();
+
+    private TablaContingenciaResult Tabla => EstadisticaService.CalcularTablaContingencia(DatosService.Ventas);
+    private ChiCuadradoResult ChiResultado => EstadisticaService.CalcularChiCuadrado(Tabla);
+    private RegresionResult Regresion => EstadisticaService.CalcularRegresion(DatosService.Ventas);
+
+    private string InterpretacionChi => EstadisticaService.InterpretarChiCuadrado(ChiResultado, alfaCualitativo);
+    private string InterpretacionCorrelacion => EstadisticaService.InterpretarCorrelacion(Regresion.R);
+    private string InterpretacionR2 => EstadisticaService.InterpretarR2(Regresion.R2);
+    private string InterpretacionPruebaT => EstadisticaService.InterpretarPruebaT(Regresion, 1 - (nivelConfianza / 100.0));
+
+    private List<(string Label, int Value)> ObtenerBarrasPorFila()
+    {
+        return Tabla.Filas.Select((f, i) => (f, Tabla.MarginalesFila[i])).ToList();
+    }
+
+    private List<(string X, string Y)> PuntosDispersion
+    {
+        get
+        {
+            var puntos = new List<(string X, string Y)>();
+            if (Regresion.ValoresX.Count == 0) return puntos;
+
+            double minX = Regresion.ValoresX.Min();
+            double maxX = Regresion.ValoresX.Max();
+            double minY = Regresion.ValoresY.Min();
+            double maxY = Regresion.ValoresY.Max();
+            double spanX = Math.Max(1, maxX - minX);
+            double spanY = Math.Max(1, maxY - minY);
+
+            for (int i = 0; i < Regresion.ValoresX.Count; i++)
+            {
+                double x = 30 + ((Regresion.ValoresX[i] - minX) / spanX) * 360;
+                double y = 220 - ((Regresion.ValoresY[i] - minY) / spanY) * 200;
+                puntos.Add((x.ToString(CultureInfo.InvariantCulture), y.ToString(CultureInfo.InvariantCulture)));
+            }
+
+            return puntos;
+        }
+    }
+
+    private List<(string X, string Y)> PuntosRegresion
+    {
+        get
+        {
+            var puntos = new List<(string X, string Y)>();
+            if (Regresion.ValoresX.Count == 0) return puntos;
+
+            double minX = Regresion.ValoresX.Min();
+            double maxX = Regresion.ValoresX.Max();
+            double minY = Regresion.ValoresY.Min();
+            double maxY = Regresion.ValoresY.Max();
+            double spanX = Math.Max(1, maxX - minX);
+            double spanY = Math.Max(1, maxY - minY);
+
+            double x1 = minX;
+            double x2 = maxX;
+            double y1 = Regresion.B0 + Regresion.B1 * x1;
+            double y2 = Regresion.B0 + Regresion.B1 * x2;
+
+            double x1Plot = 30 + ((x1 - minX) / spanX) * 360;
+            double y1Plot = 220 - ((y1 - minY) / spanY) * 200;
+            double x2Plot = 30 + ((x2 - minX) / spanX) * 360;
+            double y2Plot = 220 - ((y2 - minY) / spanY) * 200;
+
+            puntos.Add((x1Plot.ToString(CultureInfo.InvariantCulture), y1Plot.ToString(CultureInfo.InvariantCulture)));
+            puntos.Add((x2Plot.ToString(CultureInfo.InvariantCulture), y2Plot.ToString(CultureInfo.InvariantCulture)));
+            return puntos;
+        }
+    }
+
+    private List<(string X, string Y)> PuntosResiduos
+    {
+        get
+        {
+            var puntos = new List<(string X, string Y)>();
+            if (Regresion.ValoresAjustados.Count == 0) return puntos;
+
+            double minX = Regresion.ValoresAjustados.Min();
+            double maxX = Regresion.ValoresAjustados.Max();
+            double minY = Regresion.Residuos.Min();
+            double maxY = Regresion.Residuos.Max();
+            double spanX = Math.Max(1, maxX - minX);
+            double spanY = Math.Max(1, maxY - minY);
+
+            for (int i = 0; i < Regresion.ValoresAjustados.Count; i++)
+            {
+                double x = 30 + ((Regresion.ValoresAjustados[i] - minX) / spanX) * 360;
+                double y = 220 - ((Regresion.Residuos[i] - minY) / spanY) * 200;
+                puntos.Add((x.ToString(CultureInfo.InvariantCulture), y.ToString(CultureInfo.InvariantCulture)));
+            }
+
+            return puntos;
+        }
+    }
+
+    private List<(string X, string Y)> PuntosQQ
+    {
+        get
+        {
+            var puntos = new List<(string X, string Y)>();
+            var qq = EstadisticaService.CalcularQQPlot(Regresion.Residuos);
+            if (qq.Count == 0) return puntos;
+
+            double minX = qq.Min(p => (double)p.X);
+            double maxX = qq.Max(p => (double)p.X);
+            double minY = qq.Min(p => (double)p.Y);
+            double maxY = qq.Max(p => (double)p.Y);
+            double spanX = Math.Max(1, maxX - minX);
+            double spanY = Math.Max(1, maxY - minY);
+
+            foreach (var punto in qq)
+            {
+                double x = 30 + (((double)punto.X - minX) / spanX) * 360;
+                double y = 220 - (((double)punto.Y - minY) / spanY) * 200;
+                puntos.Add((x.ToString(CultureInfo.InvariantCulture), y.ToString(CultureInfo.InvariantCulture)));
+            }
+
+            return puntos;
+        }
+    }
+
+    private (double limInf, double limSup) ICMedia
+    {
+        get
+        {
+            var resultado = EstadisticaService.IntervaloConfianzaMedia(Regresion, valorXPrediccion, nivelConfianza);
+            return (resultado.limInf, resultado.limSup);
+        }
+    }
+
+    private (double limInf, double limSup) IPrediccion
+    {
+        get
+        {
+            var resultado = EstadisticaService.IntervaloPrediccion(Regresion, valorXPrediccion, nivelConfianza);
+            return (resultado.limInf, resultado.limSup);
+        }
+    }
+}
