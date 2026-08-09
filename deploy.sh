@@ -38,15 +38,14 @@ fi
 # Add .nojekyll file to bypass Jekyll processing on GitHub Pages (required for _framework folder)
 touch "$PUBLISH_DIR/.nojekyll"
 
-# Adjust <base href="/" /> in index.html to match GitHub Pages path
-# Using sed to replace <base href="..." /> with <base href="/REPO_NAME/" />
+# Adjust <base href="..." /> in index.html to match GitHub Pages path
 echo "Updating base href to /$REPO_NAME/..."
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS sed requires an empty string argument for -i
-    sed -i '' "s|<base href=\"/\" />|<base href=\"/$REPO_NAME/\" />|g" "$INDEX_FILE"
+    # macOS sed
+    sed -i '' -E "s|<base href=\"[^\"]*\" />|<base href=\"/$REPO_NAME/\" />|g" "$INDEX_FILE"
 else
     # Linux sed
-    sed -i "s|<base href=\"/\" />|<base href=\"/$REPO_NAME/\" />|g" "$INDEX_FILE"
+    sed -i -E "s|<base href=\"[^\"]*\" />|<base href=\"/$REPO_NAME/\" />|g" "$INDEX_FILE"
 fi
 
 # Create a 404.html (copy of index.html) to support SPA client-side routing on direct navigation / page reloads
