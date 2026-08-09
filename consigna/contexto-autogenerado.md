@@ -276,6 +276,22 @@ Este avance es importante porque cubre los bloques centrales de la consigna: an�
 - El proyecto ya incluye mayor detalle inferencial en ambas páginas y una presentación más completa de los resultados.
 - El bloqueo de build local se registra para que el próximo paso sea corregir el entorno antes de continuar la validación.
 
+### Sesión 11 — 9 de agosto de 2026 (Auditoría de módulos y corrección de errores de representación y cálculo)
+
+#### Prompt del usuario:
+> *"hay problemas en algunos modulos con numeros que no se representan o errores en general, revisa los modulos de ambas paginas para detectar y solucionar errores, actualiza consigna/contexto-autogenerado.md con los cambios que hayas realizado"*
+
+#### Acciones realizadas:
+1. **Auditoría del Servicio de Estadística (`EstadisticaService.cs`)**:
+   - **Corrección de `IntervaloConfianzaCorrelacion`**: Se identificó que cuando la correlación muestra un valor límite (\(r = 1.0\) o \(r = -1.0\)), `Math.Atanh(r)` devolvía `Infinity` / `NaN`. Se implementó `Math.Clamp(r, -0.99999999, 0.99999999)` para garantizar que el cálculo produzca un intervalo finito y válido.
+2. **Defensa ante datos vacíos/incompletos o sin variabilidad (`Home.razor` e `Inferencia.razor`)**:
+   - **Visualización SVG de Gráficos de Dispersión y Regresión**: Se aseguraron las funciones de cálculo de coordenadas SVG (`PuntosDispersion`, `PuntosRegresion`, `YInterceptoRecta`, `YFinalRecta`) aplicando guardas con `Math.Max(1e-9, ...)` en las amplitudes de ejes (`spanX`, `spanY`). Esto evita divisiones por cero (`NaN` o `Infinity`) que impedían que las líneas o puntos SVG se renderizaran en pantalla.
+   - **Gráficos de Residuos y Q-Q Plot**: Se agregaron comprobaciones para verificar que existan residuos y valores ajustados antes de calcular sus rangos dinámicos.
+   - **Tabla de Frecuencias Esperadas y Contingencia**: Se introdujeron directivas `@if` defensivas que previenen excepciones `IndexOutOfRangeException` o tablas vacías al cargar datasets vacíos o con 1 sola categoría.
+3. **Validación Automática**:
+   - Se añadió un conjunto de pruebas unitarias parametrizadas (`Theory`) en `DashboardEstadisticaII.Tests/UnitTest1.cs` para auditar la robustez del intervalo de confianza de la correlación con valores extremos (\(r = -1.0, 0.0, 1.0\)).
+   - Se compilaron y ejecutaron con éxito la totalidad de los tests con `dotnet test` y `dotnet build`.
+
 ### Sesión 9 — 6 de agosto de 2026 (documentación de despliegue y corrección de regresión)
 
 #### Prompt del usuario:

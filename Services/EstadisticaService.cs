@@ -312,7 +312,8 @@ public ChiCuadradoResult CalcularChiCuadrado(TablaContingenciaResult tabla, doub
         double r, int n, double nivelConfianza)
     {
         if (n <= 3) return (r, r);
-        double z = Math.Atanh(r);
+        double rClamped = Math.Clamp(r, -0.99999999, 0.99999999);
+        double z = Math.Atanh(rClamped);
         double se = 1.0 / Math.Sqrt(n - 3);
         double alfa = 1.0 - nivelConfianza / 100.0;
         double zCrit = Normal.InvCDF(0, 1, 1.0 - alfa / 2.0);

@@ -40,41 +40,48 @@
                 <div class="dashboard-card h-100">
                     <h4 class="h5 fw-semibold mb-3">Prueba de independencia / homogeneidad</h4>
                     <p class="text-muted">Se evalúa si la distribución de Modo de Uso difiere entre las zonas.</p>
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle">
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    @foreach (var col in Tabla.Columnas)
-                                    {
-                                        <th>@col</th>
-                                    }
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (int i = 0; i < Tabla.Filas.Count; i++)
-                                {
+                    @if (Tabla.Filas.Count > 0 && Tabla.Columnas.Count > 0 && ChiResultado.FrecuenciasEsperadas.GetLength(0) == Tabla.Filas.Count)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle">
+                                <thead>
                                     <tr>
-                                        <th>@Tabla.Filas[i]</th>
+                                        <th></th>
+                                        @foreach (var col in Tabla.Columnas)
+                                        {
+                                            <th>@col</th>
+                                        }
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < Tabla.Filas.Count; i++)
+                                    {
+                                        <tr>
+                                            <th>@Tabla.Filas[i]</th>
+                                            @for (int j = 0; j < Tabla.Columnas.Count; j++)
+                                            {
+                                                <td>@ChiResultado.FrecuenciasEsperadas[i, j].ToString("0.00", CultureInfo.InvariantCulture)</td>
+                                            }
+                                            <td class="fw-semibold">@Tabla.MarginalesFila[i]</td>
+                                        </tr>
+                                    }
+                                    <tr>
+                                        <th>Total</th>
                                         @for (int j = 0; j < Tabla.Columnas.Count; j++)
                                         {
-                                            <td>@ChiResultado.FrecuenciasEsperadas[i, j].ToString("0.00", CultureInfo.InvariantCulture)</td>
+                                            <td class="fw-semibold">@Tabla.MarginalesColumna[j]</td>
                                         }
-                                        <td class="fw-semibold">@Tabla.MarginalesFila[i]</td>
+                                        <td class="fw-semibold">@Tabla.Total</td>
                                     </tr>
-                                }
-                                <tr>
-                                    <th>Total</th>
-                                    @for (int j = 0; j < Tabla.Columnas.Count; j++)
-                                    {
-                                        <td class="fw-semibold">@Tabla.MarginalesColumna[j]</td>
-                                    }
-                                    <td class="fw-semibold">@Tabla.Total</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No hay frecuencias esperadas suficientes para mostrar.</p>
+                    }
                     <div class="row g-2 mt-3">
                         <div class="col-4">
                             <div class="metric-card">
@@ -321,13 +328,13 @@
     {
         get
         {
+            if (Regresion.ValoresX.Count == 0 || Regresion.ValoresY.Count == 0) return "190";
             double minX = Regresion.ValoresX.Min();
             double maxX = Regresion.ValoresX.Max();
             double minY = Regresion.ValoresY.Min();
             double maxY = Regresion.ValoresY.Max();
-            double spanY = Math.Max(1, maxY - minY);
+            double spanY = Math.Max(1e-9, maxY - minY);
             double y0 = 190 - ((Regresion.B0 + Regresion.B1 * minX - minY) / spanY) * 170;
-            double y1 = 190 - ((Regresion.B0 + Regresion.B1 * maxX - minY) / spanY) * 170;
             return Math.Round(y0, 2).ToString(CultureInfo.InvariantCulture);
         }
     }
@@ -336,12 +343,12 @@
     {
         get
         {
+            if (Regresion.ValoresX.Count == 0 || Regresion.ValoresY.Count == 0) return "190";
             double minX = Regresion.ValoresX.Min();
             double maxX = Regresion.ValoresX.Max();
             double minY = Regresion.ValoresY.Min();
             double maxY = Regresion.ValoresY.Max();
-            double spanY = Math.Max(1, maxY - minY);
-            double y0 = 190 - ((Regresion.B0 + Regresion.B1 * minX - minY) / spanY) * 170;
+            double spanY = Math.Max(1e-9, maxY - minY);
             double y1 = 190 - ((Regresion.B0 + Regresion.B1 * maxX - minY) / spanY) * 170;
             return Math.Round(y1, 2).ToString(CultureInfo.InvariantCulture);
         }
@@ -352,14 +359,14 @@
         get
         {
             var puntos = new List<(string X, string Y)>();
-            if (Regresion.ValoresAjustados.Count == 0) return puntos;
+            if (Regresion.ValoresAjustados.Count == 0 || Regresion.Residuos.Count == 0) return puntos;
 
             double minX = Regresion.ValoresAjustados.Min();
             double maxX = Regresion.ValoresAjustados.Max();
             double minY = Regresion.Residuos.Min();
             double maxY = Regresion.Residuos.Max();
-            double spanX = Math.Max(1, maxX - minX);
-            double spanY = Math.Max(1, maxY - minY);
+            double spanX = Math.Max(1e-9, maxX - minX);
+            double spanY = Math.Max(1e-9, maxY - minY);
 
             for (int i = 0; i < Regresion.ValoresAjustados.Count; i++)
             {
@@ -377,6 +384,7 @@
         get
         {
             var puntos = new List<(string X, string Y)>();
+            if (Regresion.Residuos.Count == 0) return puntos;
             var qq = EstadisticaService.CalcularQQPlot(Regresion.Residuos);
             if (qq.Count == 0) return puntos;
 
@@ -384,8 +392,8 @@
             double maxX = qq.Max(p => (double)p.X);
             double minY = qq.Min(p => (double)p.Y);
             double maxY = qq.Max(p => (double)p.Y);
-            double spanX = Math.Max(1, maxX - minX);
-            double spanY = Math.Max(1, maxY - minY);
+            double spanX = Math.Max(1e-9, maxX - minX);
+            double spanY = Math.Max(1e-9, maxY - minY);
 
             foreach (var punto in qq)
             {
