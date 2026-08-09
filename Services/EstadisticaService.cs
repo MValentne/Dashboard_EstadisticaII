@@ -102,7 +102,8 @@ public ChiCuadradoResult CalcularChiCuadrado(TablaContingenciaResult tabla, doub
     }
 
     int gl = (nF - 1) * (nC - 1);
-    double pValor = gl > 0 ? 1.0 - ChiSquared.CDF(gl, chi2) : 1.0;
+    double pValor = gl > 0 ? 1.0 - ChiSquared.CDF(gl, Math.Max(0, chi2)) : 1.0;
+    pValor = Math.Clamp(pValor, 0.0, 1.0);
     double valorCritico = gl > 0 ? ChiSquared.InvCDF(gl, 1.0 - alfa) : 0;
 
     // Evaluar supuestos
@@ -223,6 +224,7 @@ public ChiCuadradoResult CalcularChiCuadrado(TablaContingenciaResult tabla, doub
         double pValor = gl > 0 && double.IsFinite(tStat) && seb1 > 0
             ? 2.0 * (1.0 - StudentT.CDF(0, 1, gl, Math.Abs(tStat)))
             : 1.0;
+        pValor = Math.Clamp(pValor, 0.0, 1.0);
 
         return new RegresionResult
         {

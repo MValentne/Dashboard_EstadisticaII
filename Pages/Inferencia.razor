@@ -152,7 +152,7 @@
                     </div>
 
                     <label class="form-label mt-3">Precio para predicción</label>
-                    <input type="number" class="form-control mb-3" @bind="valorXPrediccion" min="0" step="100" />
+                    <input type="number" class="form-control mb-3" @bind="valorXPrediccion" @bind:event="oninput" min="0" step="10000" />
 
                     <p class="mt-2 mb-1 fw-semibold">Predicción con el modelo</p>
                     <p class="text-muted mb-0">ŷ = @Regresion.B0.ToString("0.00", CultureInfo.InvariantCulture) @((Regresion.B1 >= 0) ? "+" : "-") @Math.Abs(Regresion.B1).ToString("0.000", CultureInfo.InvariantCulture) × Precio</p>
@@ -240,12 +240,28 @@
 
     protected override void OnInitialized()
     {
-        DatosService.OnDatosChanged += StateHasChanged;
+        DatosService.OnDatosChanged += OnDatosActualizados;
+        ActualizarValorPrediccionDefecto();
+    }
+
+    private void OnDatosActualizados()
+    {
+        ActualizarValorPrediccionDefecto();
+        StateHasChanged();
+    }
+
+    private void ActualizarValorPrediccionDefecto()
+    {
+        if (DatosService.Ventas.Count > 0)
+        {
+            var media = (double)DatosService.Ventas.Average(v => v.Precio);
+            valorXPrediccion = Math.Round(media, -4); // Redondear a miles
+        }
     }
 
     public void Dispose()
     {
-        DatosService.OnDatosChanged -= StateHasChanged;
+        DatosService.OnDatosChanged -= OnDatosActualizados;
     }
 
     private async Task OnArchivoSeleccionado(InputFileChangeEventArgs e)

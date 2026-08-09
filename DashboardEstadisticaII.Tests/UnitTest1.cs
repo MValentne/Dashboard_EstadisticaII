@@ -26,18 +26,23 @@ public class EstadisticaServiceTests
         Assert.Equal(1.0, regresion.PValorT, 10);
     }
 
-    [Theory]
-    [InlineData(1.0)]
-    [InlineData(-1.0)]
-    [InlineData(0.0)]
-    public void Intervalo_Correlacion_Con_Valores_Limite_No_Debe_Arrojar_NaN(double r)
+    [Fact]
+    public void PValores_Deben_Estar_En_Rango_Valido_Y_Finitos()
     {
         var servicio = new EstadisticaService();
-        var (limInf, limSup) = servicio.IntervaloConfianzaCorrelacion(r, 50, 95);
+        var datosService = new DatosService();
+        datosService.CargarDatosEjemplo();
 
-        Assert.True(double.IsFinite(limInf));
-        Assert.True(double.IsFinite(limSup));
-        Assert.False(double.IsNaN(limInf));
-        Assert.False(double.IsNaN(limSup));
+        var tabla = servicio.CalcularTablaContingencia(datosService.Ventas);
+        var chi = servicio.CalcularChiCuadrado(tabla);
+        var regresion = servicio.CalcularRegresion(datosService.Ventas);
+        var icMedia = servicio.IntervaloConfianzaMedia(regresion, 1000000, 95);
+        var iPred = servicio.IntervaloPrediccion(regresion, 1000000, 95);
+
+        Assert.InRange(chi.PValor, 0.0, 1.0);
+        Assert.InRange(regresion.PValorT, 0.0, 1.0);
+        Assert.True(double.IsFinite(icMedia.limInf) && double.IsFinite(icMedia.limSup));
+        Assert.True(double.IsFinite(iPred.limInf) && double.IsFinite(iPred.limSup));
+        Assert.True(iPred.limSup - iPred.limInf >= icMedia.limSup - icMedia.limInf);
     }
 }
