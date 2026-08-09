@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "targets": {
     "net10.0": {
       "Blazor-ApexCharts/7.0.0": {
@@ -117,7 +117,7 @@
           }
         }
       },
-      "Microsoft.AspNetCore.App.Internal.Assets/10.0.10": {
+      "Microsoft.AspNetCore.App.Internal.Assets/10.0.8": {
         "type": "package",
         "build": {
           "build/Microsoft.AspNetCore.App.Internal.Assets.props": {},
@@ -653,13 +653,13 @@
           }
         }
       },
-      "Microsoft.NET.ILLink.Tasks/10.0.10": {
+      "Microsoft.NET.ILLink.Tasks/10.0.8": {
         "type": "package",
         "build": {
           "build/Microsoft.NET.ILLink.Tasks.props": {}
         }
       },
-      "Microsoft.NET.Sdk.WebAssembly.Pack/10.0.10": {
+      "Microsoft.NET.Sdk.WebAssembly.Pack/10.0.8": {
         "type": "package",
         "build": {
           "build/Microsoft.NET.Sdk.WebAssembly.Pack.props": {},
@@ -825,7 +825,7 @@
           }
         }
       },
-      "Microsoft.AspNetCore.App.Internal.Assets/10.0.10": {
+      "Microsoft.AspNetCore.App.Internal.Assets/10.0.8": {
         "type": "package",
         "build": {
           "build/Microsoft.AspNetCore.App.Internal.Assets.props": {},
@@ -1361,13 +1361,13 @@
           }
         }
       },
-      "Microsoft.NET.ILLink.Tasks/10.0.10": {
+      "Microsoft.NET.ILLink.Tasks/10.0.8": {
         "type": "package",
         "build": {
           "build/Microsoft.NET.ILLink.Tasks.props": {}
         }
       },
-      "Microsoft.NET.Sdk.WebAssembly.Pack/10.0.10": {
+      "Microsoft.NET.Sdk.WebAssembly.Pack/10.0.8": {
         "type": "package",
         "build": {
           "build/Microsoft.NET.Sdk.WebAssembly.Pack.props": {},
@@ -1616,10 +1616,10 @@
         "mathnet.numerics.nuspec"
       ]
     },
-    "Microsoft.AspNetCore.App.Internal.Assets/10.0.10": {
-      "sha512": "8k0KoYKvNrSqP8E3oDJMBVKavlTEE6BacdLGtEDcxv9Hz0XxWFkD6JdLJsxXUlGeAfZ6YfvWmxKenl73qeCTSA==",
+    "Microsoft.AspNetCore.App.Internal.Assets/10.0.8": {
+      "sha512": "v6KocthydFtUHBIRI29YsOHKOgsqcQubkNywVOxiYr4GSDSv+XO/AeyMJywlX+1tGUTGdydu/X7V+Tzeq4SsoA==",
       "type": "package",
-      "path": "microsoft.aspnetcore.app.internal.assets/10.0.10",
+      "path": "microsoft.aspnetcore.app.internal.assets/10.0.8",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1635,7 +1635,7 @@
         "build/Microsoft.AspNetCore.App.Internal.Assets.targets",
         "buildMultiTargeting/Microsoft.AspNetCore.App.Internal.Assets.targets",
         "buildTransitive/Microsoft.AspNetCore.App.Internal.Assets.targets",
-        "microsoft.aspnetcore.app.internal.assets.10.0.10.nupkg.sha512",
+        "microsoft.aspnetcore.app.internal.assets.10.0.8.nupkg.sha512",
         "microsoft.aspnetcore.app.internal.assets.nuspec"
       ]
     },
@@ -2572,13 +2572,14 @@
         "microsoft.jsinterop.webassembly.nuspec"
       ]
     },
-    "Microsoft.NET.ILLink.Tasks/10.0.10": {
-      "sha512": "wFVNrRbbE5tPnKkZilamQmei9fQ1eETRHL5I0hDoLIJOt87v84AHNTvy6uY88/rTZdlW4B/6SMJt0yEGI5VCKA==",
+    "Microsoft.NET.ILLink.Tasks/10.0.8": {
+      "sha512": "dVbSXGIFNR5nZcv2tOLoWI+a9T4jtFd77IYjuND+QVe360qWgAF7H0WtoopYhRw/+SgpGUTyrkrh+65+ClNnfw==",
       "type": "package",
-      "path": "microsoft.net.illink.tasks/10.0.10",
+      "path": "microsoft.net.illink.tasks/10.0.8",
       "hasTools": true,
       "files": [
         ".nupkg.metadata",
+        ".signature.p7s",
         "Icon.png",
         "Sdk/Sdk.props",
         "THIRD-PARTY-NOTICES.TXT",
@@ -2587,7 +2588,7 @@
         "build/Microsoft.NET.ILLink.Analyzers.props",
         "build/Microsoft.NET.ILLink.Tasks.props",
         "build/Microsoft.NET.ILLink.targets",
-        "microsoft.net.illink.tasks.10.0.10.nupkg.sha512",
+        "microsoft.net.illink.tasks.10.0.8.nupkg.sha512",
         "microsoft.net.illink.tasks.nuspec",
         "tools/net/ILLink.Tasks.deps.json",
         "tools/net/ILLink.Tasks.dll",
@@ -2602,13 +2603,29 @@
         "tools/net/illink.deps.json",
         "tools/net/illink.dll",
         "tools/net/illink.runtimeconfig.json",
+        "tools/netframework/ILLink.Tasks.dll",
+        "tools/netframework/ILLink.Tasks.dll.config",
+        "tools/netframework/Mono.Cecil.Mdb.dll",
+        "tools/netframework/Mono.Cecil.Pdb.dll",
+        "tools/netframework/Mono.Cecil.Rocks.dll",
+        "tools/netframework/Mono.Cecil.dll",
+        "tools/netframework/Sdk/Sdk.props",
+        "tools/netframework/System.Buffers.dll",
+        "tools/netframework/System.Collections.Immutable.dll",
+        "tools/netframework/System.Memory.dll",
+        "tools/netframework/System.Numerics.Vectors.dll",
+        "tools/netframework/System.Reflection.Metadata.dll",
+        "tools/netframework/System.Runtime.CompilerServices.Unsafe.dll",
+        "tools/netframework/build/Microsoft.NET.ILLink.Analyzers.props",
+        "tools/netframework/build/Microsoft.NET.ILLink.Tasks.props",
+        "tools/netframework/build/Microsoft.NET.ILLink.targets",
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.NET.Sdk.WebAssembly.Pack/10.0.10": {
-      "sha512": "gvkxv3MsFo+okExR2N8eo1asV/xnfSSvp8duAGyQARar/V+OStp4QfkFI1Ek6SkT3k7U3+3XLj2nqDFJaEL8Cg==",
+    "Microsoft.NET.Sdk.WebAssembly.Pack/10.0.8": {
+      "sha512": "xQ05xw4t8wjFxwD7a/Nye/IPEihIyUkZIbRzTytVFqko6Ows3UvjqHIEjk3gCOIZloNFOLykYPsTyKRCvEs6ng==",
       "type": "package",
-      "path": "microsoft.net.sdk.webassembly.pack/10.0.10",
+      "path": "microsoft.net.sdk.webassembly.pack/10.0.8",
       "hasTools": true,
       "files": [
         ".nupkg.metadata",
@@ -2638,7 +2655,7 @@
         "build/Microsoft.NET.Sdk.WebAssembly.Pack.targets",
         "build/Wasm.web.config",
         "build/browser.runtimeconfig.template.json",
-        "microsoft.net.sdk.webassembly.pack.10.0.10.nupkg.sha512",
+        "microsoft.net.sdk.webassembly.pack.10.0.8.nupkg.sha512",
         "microsoft.net.sdk.webassembly.pack.nuspec",
         "tools/net10.0/Microsoft.NET.Sdk.WebAssembly.Pack.Tasks.dll",
         "tools/net10.0/Microsoft.NET.WebAssembly.Webcil.dll",
@@ -2717,37 +2734,39 @@
       "Blazor-ApexCharts >= 7.0.0",
       "ClosedXML >= 0.104.2",
       "MathNet.Numerics >= 5.0.0",
-      "Microsoft.AspNetCore.App.Internal.Assets >= 10.0.10",
+      "Microsoft.AspNetCore.App.Internal.Assets >= 10.0.8",
       "Microsoft.AspNetCore.Components.WebAssembly >= 10.0.10",
       "Microsoft.AspNetCore.Components.WebAssembly.DevServer >= 10.0.10",
-      "Microsoft.NET.ILLink.Tasks >= 10.0.10",
-      "Microsoft.NET.Sdk.WebAssembly.Pack >= 10.0.10"
+      "Microsoft.NET.ILLink.Tasks >= 10.0.8",
+      "Microsoft.NET.Sdk.WebAssembly.Pack >= 10.0.8"
     ]
   },
   "packageFolders": {
-    "/home/valentino/.nuget/packages/": {}
+    "C:\\Users\\Usuario\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/valentino/Desktop/DashboardEstadisticaII/DashboardEstadisticaII.csproj",
+      "projectUniqueName": "C:\\Users\\Usuario\\Desktop\\Dashboard_EstadisticaII\\DashboardEstadisticaII.csproj",
       "projectName": "DashboardEstadisticaII",
-      "projectPath": "/home/valentino/Desktop/DashboardEstadisticaII/DashboardEstadisticaII.csproj",
-      "packagesPath": "/home/valentino/.nuget/packages/",
-      "outputPath": "/home/valentino/Desktop/DashboardEstadisticaII/obj/",
+      "projectPath": "C:\\Users\\Usuario\\Desktop\\Dashboard_EstadisticaII\\DashboardEstadisticaII.csproj",
+      "packagesPath": "C:\\Users\\Usuario\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Usuario\\Desktop\\Dashboard_EstadisticaII\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/valentino/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\Usuario\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
       ],
       "sources": {
-        "/usr/lib/dotnet/library-packs": {},
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net10.0": {
+          "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {}
         }
@@ -2762,10 +2781,11 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-      "SdkAnalysisLevel": "10.0.100"
+      "SdkAnalysisLevel": "10.0.300"
     },
     "frameworks": {
       "net10.0": {
+        "framework": "net10.0",
         "targetAlias": "net10.0",
         "dependencies": {
           "Blazor-ApexCharts": {
@@ -2783,7 +2803,7 @@
           "Microsoft.AspNetCore.App.Internal.Assets": {
             "suppressParent": "All",
             "target": "Package",
-            "version": "[10.0.10, )",
+            "version": "[10.0.8, )",
             "autoReferenced": true
           },
           "Microsoft.AspNetCore.Components.WebAssembly": {
@@ -2798,13 +2818,13 @@
           "Microsoft.NET.ILLink.Tasks": {
             "suppressParent": "All",
             "target": "Package",
-            "version": "[10.0.10, )",
+            "version": "[10.0.8, )",
             "autoReferenced": true
           },
           "Microsoft.NET.Sdk.WebAssembly.Pack": {
             "suppressParent": "All",
             "target": "Package",
-            "version": "[10.0.10, )",
+            "version": "[10.0.8, )",
             "autoReferenced": true
           }
         },
@@ -2822,7 +2842,7 @@
         "downloadDependencies": [
           {
             "name": "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
-            "version": "[10.0.10, 10.0.10]"
+            "version": "[10.0.8, 10.0.8]"
           }
         ],
         "frameworkReferences": {
@@ -2830,7 +2850,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.110/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",
