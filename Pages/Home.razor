@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @using DashboardEstadisticaII.Models
 @using Microsoft.AspNetCore.Components.Forms
 @using System.Globalization
@@ -73,59 +73,66 @@
                         </div>
                         <span class="badge bg-primary-subtle text-primary">Descriptivo</span>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Zonas</th>
-                                    @foreach (var col in Tabla.Columnas)
-                                    {
-                                        <th>@col</th>
-                                    }
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @for (int i = 0; i < Tabla.Filas.Count; i++)
-                                {
+                    @if (Tabla.Filas.Count > 0 && Tabla.Columnas.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle">
+                                <thead>
                                     <tr>
-                                        <th>@Tabla.Filas[i]</th>
+                                        <th>Zonas</th>
+                                        @foreach (var col in Tabla.Columnas)
+                                        {
+                                            <th>@col</th>
+                                        }
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < Tabla.Filas.Count; i++)
+                                    {
+                                        <tr>
+                                            <th>@Tabla.Filas[i]</th>
+                                            @for (int j = 0; j < Tabla.Columnas.Count; j++)
+                                            {
+                                                <td>@Tabla.Frecuencias[i, j]</td>
+                                            }
+                                            <td class="fw-semibold">@Tabla.MarginalesFila[i]</td>
+                                        </tr>
+                                    }
+                                    <tr>
+                                        <th>Total</th>
                                         @for (int j = 0; j < Tabla.Columnas.Count; j++)
                                         {
-                                            <td>@Tabla.Frecuencias[i, j]</td>
+                                            <td class="fw-semibold">@Tabla.MarginalesColumna[j]</td>
                                         }
-                                        <td class="fw-semibold">@Tabla.MarginalesFila[i]</td>
+                                        <td class="fw-semibold">@Tabla.Total</td>
                                     </tr>
-                                }
-                                <tr>
-                                    <th>Total</th>
-                                    @for (int j = 0; j < Tabla.Columnas.Count; j++)
-                                    {
-                                        <td class="fw-semibold">@Tabla.MarginalesColumna[j]</td>
-                                    }
-                                    <td class="fw-semibold">@Tabla.Total</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="mt-4">
-                        <h6 class="fw-semibold">Distribución por zona</h6>
-                        <div class="d-flex flex-column gap-2">
-                            @foreach (var fila in ObtenerBarrasPorFila())
-                            {
-                                <div>
-                                    <div class="d-flex justify-content-between small mb-1">
-                                        <span>@fila.Label</span>
-                                        <span>@fila.Value</span>
-                                    </div>
-                                    <div class="bar-track">
-                                        <div class="bar-fill" style="width:@((fila.Value / Math.Max(1, Tabla.Total) * 100).ToString("0", CultureInfo.InvariantCulture))%"></div>
-                                    </div>
-                                </div>
-                            }
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
+
+                        <div class="mt-4">
+                            <h6 class="fw-semibold">Distribución por zona</h6>
+                            <div class="d-flex flex-column gap-2">
+                                @foreach (var fila in ObtenerBarrasPorFila())
+                                {
+                                    <div>
+                                        <div class="d-flex justify-content-between small mb-1">
+                                            <span>@fila.Label</span>
+                                            <span>@fila.Value</span>
+                                        </div>
+                                        <div class="bar-track">
+                                            <div class="bar-fill" style="width:@((fila.Value / (double)Math.Max(1, Tabla.Total) * 100).ToString("0.0", CultureInfo.InvariantCulture))%"></div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No hay datos suficientes para generar la tabla de contingencia.</p>
+                    }
                 </div>
             </div>
 
@@ -256,14 +263,14 @@
         get
         {
             var puntos = new List<(string X, string Y)>();
-            if (Regresion.ValoresX.Count == 0) return puntos;
+            if (Regresion.ValoresX.Count == 0 || Regresion.ValoresY.Count == 0) return puntos;
 
             double minX = Regresion.ValoresX.Min();
             double maxX = Regresion.ValoresX.Max();
             double minY = Regresion.ValoresY.Min();
             double maxY = Regresion.ValoresY.Max();
-            double spanX = Math.Max(1, maxX - minX);
-            double spanY = Math.Max(1, maxY - minY);
+            double spanX = Math.Max(1e-9, maxX - minX);
+            double spanY = Math.Max(1e-9, maxY - minY);
 
             for (int i = 0; i < Regresion.ValoresX.Count; i++)
             {
@@ -281,14 +288,14 @@
         get
         {
             var puntos = new List<(string X, string Y)>();
-            if (Regresion.ValoresX.Count == 0) return puntos;
+            if (Regresion.ValoresX.Count == 0 || Regresion.ValoresY.Count == 0) return puntos;
 
             double minX = Regresion.ValoresX.Min();
             double maxX = Regresion.ValoresX.Max();
             double minY = Regresion.ValoresY.Min();
             double maxY = Regresion.ValoresY.Max();
-            double spanX = Math.Max(1, maxX - minX);
-            double spanY = Math.Max(1, maxY - minY);
+            double spanX = Math.Max(1e-9, maxX - minX);
+            double spanY = Math.Max(1e-9, maxY - minY);
 
             double x1 = minX;
             double x2 = maxX;

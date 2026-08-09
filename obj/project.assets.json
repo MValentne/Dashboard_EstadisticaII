@@ -2742,19 +2742,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Usuario\\.nuget\\packages\\": {}
+    "C:\\Users\\Estudiante\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Usuario\\Desktop\\Dashboard_EstadisticaII\\DashboardEstadisticaII.csproj",
+      "projectUniqueName": "C:\\Users\\Estudiante\\Documents\\GitHub\\Dashboard_EstadisticaII\\DashboardEstadisticaII.csproj",
       "projectName": "DashboardEstadisticaII",
-      "projectPath": "C:\\Users\\Usuario\\Desktop\\Dashboard_EstadisticaII\\DashboardEstadisticaII.csproj",
-      "packagesPath": "C:\\Users\\Usuario\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Usuario\\Desktop\\Dashboard_EstadisticaII\\obj\\",
+      "projectPath": "C:\\Users\\Estudiante\\Documents\\GitHub\\Dashboard_EstadisticaII\\DashboardEstadisticaII.csproj",
+      "packagesPath": "C:\\Users\\Estudiante\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Estudiante\\Documents\\GitHub\\Dashboard_EstadisticaII\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Usuario\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Estudiante\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
