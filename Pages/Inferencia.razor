@@ -255,7 +255,7 @@
         if (DatosService.Ventas.Count > 0)
         {
             var media = (double)DatosService.Ventas.Average(v => v.Precio);
-            valorXPrediccion = Math.Round(media, -4); // Redondear a miles
+            valorXPrediccion = Math.Round(media / 1000.0) * 1000.0; // Redondear a miles
         }
     }
 
