@@ -38,8 +38,13 @@
         <div class="row g-4">
             <div class="col-xl-6">
                 <div class="dashboard-card h-100">
-                    <h4 class="h5 fw-semibold mb-3">Prueba de independencia / homogeneidad</h4>
-                    <p class="text-muted">Se evalúa si la distribución de Modo de Uso difiere entre las zonas.</p>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h4 class="h5 fw-semibold mb-1">Prueba de independencia / homogeneidad</h4>
+                            <p class="text-muted mb-0">Evalúa si la distribución de unidades vendidas por modo de uso difiere entre zonas.</p>
+                        </div>
+                        <span class="badge bg-primary-subtle text-primary">Zona × uso</span>
+                    </div>
                     @if (Tabla.Filas.Count > 0 && Tabla.Columnas.Count > 0 && ChiResultado.FrecuenciasEsperadas.GetLength(0) == Tabla.Filas.Count)
                     {
                         <div class="table-responsive">
@@ -51,7 +56,7 @@
                                         {
                                             <th>@col</th>
                                         }
-                                        <th>Total</th>
+                                        <th>Total unidades</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -67,7 +72,7 @@
                                         </tr>
                                     }
                                     <tr>
-                                        <th>Total</th>
+                                        <th>Total unidades</th>
                                         @for (int j = 0; j < Tabla.Columnas.Count; j++)
                                         {
                                             <td class="fw-semibold">@Tabla.MarginalesColumna[j]</td>
@@ -77,6 +82,7 @@
                                 </tbody>
                             </table>
                         </div>
+                        <p class="small text-muted mb-0">Cada celda muestra las unidades esperadas si zona y modo de uso no estuvieran asociados.</p>
                     }
                     else
                     {
@@ -106,7 +112,7 @@
                     <p class="text-muted mb-0">@InterpretacionChi</p>
                     <p class="text-muted mb-1">
                         p-valor = @ChiResultado.PValor.ToString("0.0000", CultureInfo.InvariantCulture).
-                        Si p-valor &lt; @alfaChi.ToString("0.00", CultureInfo.InvariantCulture), se rechaza H₀.
+                        Contrasta H₀: «la distribución de unidades por modo es igual entre zonas». Si p-valor &lt; @alfaChi.ToString("0.00", CultureInfo.InvariantCulture), se rechaza H₀.
                     </p>
                     <p class="mt-3 mb-1 fw-semibold">Supuestos</p>
                     <p class="text-muted mb-0">@ChiResultado.MensajeSupuestos</p>
@@ -115,7 +121,13 @@
 
             <div class="col-xl-6">
                 <div class="dashboard-card h-100">
-                    <h4 class="h5 fw-semibold mb-3">Prueba t para la pendiente</h4>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h4 class="h5 fw-semibold mb-1">Prueba t para la pendiente</h4>
+                            <p class="text-muted mb-0">Evalúa si el precio se asocia linealmente con la cantidad de unidades vendidas.</p>
+                        </div>
+                        <span class="badge bg-success-subtle text-success">Precio → unidades</span>
+                    </div>
                     <label class="form-label">Nivel de confianza</label>
                     <input type="range" class="form-range" min="90" max="99" step="1" @bind="nivelConfianza" @bind:event="oninput" />
                     <div class="text-muted small mb-3">@nivelConfianza% de confianza</div>
@@ -134,7 +146,7 @@
                         </div>
                     </div>
                     <p class="mt-3 mb-1 fw-semibold">Conclusión detallada</p>
-                    <p class="text-muted mb-0">@InterpretacionPruebaT</p>
+                    <p class="text-muted mb-0">@InterpretacionPruebaT Contrasta H₀: «la pendiente precio–cantidad es cero».</p>
 
                     <div class="mt-3">
                         <svg viewBox="0 0 420 220" class="chart-svg">
@@ -147,7 +159,7 @@
                             <line x1="30" y1="@YInterceptoRecta" x2="390" y2="@YFinalRecta" stroke="#fd7e14" stroke-width="2"></line>
                         </svg>
                         <div class="small text-muted mt-2">
-                            <div><strong>Gráfico:</strong> dispersión de precio vs. cantidad y recta de regresión estimada.</div>
+                            <div><strong>Gráfico:</strong> cada punto es un registro; compara precio y cantidad de unidades vendidas.</div>
                         </div>
                     </div>
 
@@ -155,13 +167,13 @@
                     <input type="number" class="form-control mb-3" @bind="valorXPrediccion" @bind:event="oninput" min="0" step="10000" />
 
                     <p class="mt-2 mb-1 fw-semibold">Predicción con el modelo</p>
-                    <p class="text-muted mb-0">ŷ = @Regresion.B0.ToString("0.00", CultureInfo.InvariantCulture) @((Regresion.B1 >= 0) ? "+" : "-") @Math.Abs(Regresion.B1).ToString("0.000", CultureInfo.InvariantCulture) × Precio</p>
+                    <p class="text-muted mb-0">ŷ = @Regresion.B0.ToString("0.00", CultureInfo.InvariantCulture) @((PendientePorMillon >= 0) ? "+" : "-") @Math.Abs(PendientePorMillon).ToString("0.00", CultureInfo.InvariantCulture) × (Precio / $1.000.000)</p>
                     <p class="text-muted mb-0">Intervalo de confianza de la media para Precio = @valorXPrediccion.ToString("0", CultureInfo.InvariantCulture): @ICMedia.limInf.ToString("0.00", CultureInfo.InvariantCulture) a @ICMedia.limSup.ToString("0.00", CultureInfo.InvariantCulture)</p>
                     <p class="text-muted mb-0">Intervalo de predicción individual: @IPrediccion.limInf.ToString("0.00", CultureInfo.InvariantCulture) a @IPrediccion.limSup.ToString("0.00", CultureInfo.InvariantCulture)</p>
-                    <p class="text-muted mb-0">R² = @Regresion.R2.ToString("0.00", CultureInfo.InvariantCulture), lo que indica que una parte significativa de la variabilidad en cantidad se explica por el precio.</p>
+                    <p class="text-muted mb-0">R² = @Regresion.R2.ToString("0.00", CultureInfo.InvariantCulture): proporción de la variabilidad de unidades vendidas que el precio explica linealmente.</p>
 
                     <p class="mt-3 mb-1 fw-semibold">Intervalo de confianza para la pendiente</p>
-                    <p class="text-muted mb-0">Con un @nivelConfianza% de confianza, el intervalo estimado para la pendiente es [@ICPendiente.limInf.ToString("0.000", CultureInfo.InvariantCulture), @ICPendiente.limSup.ToString("0.000", CultureInfo.InvariantCulture)].</p>
+                    <p class="text-muted mb-0">Con un @nivelConfianza% de confianza, el cambio estimado en unidades vendidas por cada $1.000.000 de precio es [@ICPendientePorMillon.limInf.ToString("0.00", CultureInfo.InvariantCulture), @ICPendientePorMillon.limSup.ToString("0.00", CultureInfo.InvariantCulture)].</p>
                     <p class="text-muted mb-0">Si este intervalo contiene al 0, no hay evidencia suficiente para afirmar que la pendiente sea distinta de cero.</p>
                 </div>
             </div>
@@ -170,8 +182,13 @@
         <div class="row g-4 mt-1">
             <div class="col-xl-6">
                 <div class="dashboard-card h-100">
-                    <h4 class="h5 fw-semibold mb-3">Intervalo de confianza del coeficiente r</h4>
-                    <p class="text-muted">Estimación del rango plausible de la correlación poblacional.</p>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h4 class="h5 fw-semibold mb-1">Intervalo de confianza del coeficiente r</h4>
+                            <p class="text-muted mb-0">Rango plausible de la correlación lineal entre precio y unidades vendidas.</p>
+                        </div>
+                        <span class="badge bg-info-subtle text-info">Correlación</span>
+                    </div>
                     <div class="row g-2">
                         <div class="col-6">
                             <div class="metric-card">
@@ -193,7 +210,13 @@
 
             <div class="col-xl-6">
                 <div class="dashboard-card h-100">
-                    <h4 class="h5 fw-semibold mb-3">Diagnóstico de residuos</h4>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h4 class="h5 fw-semibold mb-1">Diagnóstico de residuos</h4>
+                            <p class="text-muted mb-0">Revisa el error del modelo que estima unidades vendidas a partir del precio.</p>
+                        </div>
+                        <span class="badge bg-warning-subtle text-warning">Ajuste del modelo</span>
+                    </div>
                     <svg viewBox="0 0 420 260" class="chart-svg">
                         <line x1="30" y1="220" x2="390" y2="220" stroke="#6c757d" stroke-width="1"></line>
                         <line x1="30" y1="20" x2="30" y2="220" stroke="#6c757d" stroke-width="1"></line>
@@ -214,7 +237,13 @@
         <div class="row g-4 mt-1">
             <div class="col-12">
                 <div class="dashboard-card">
-                    <h4 class="h5 fw-semibold mb-3">Q-Q Plot de residuos</h4>
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h4 class="h5 fw-semibold mb-1">Q-Q Plot de residuos</h4>
+                            <p class="text-muted mb-0">Verifica si los errores del modelo precio–unidades se aproximan a una distribución normal.</p>
+                        </div>
+                        <span class="badge bg-danger-subtle text-danger">Normalidad</span>
+                    </div>
                     <svg viewBox="0 0 420 260" class="chart-svg">
                         <line x1="30" y1="220" x2="390" y2="220" stroke="#6c757d" stroke-width="1"></line>
                         <line x1="30" y1="20" x2="30" y2="220" stroke="#6c757d" stroke-width="1"></line>
@@ -237,6 +266,7 @@
 @code {
     private int nivelConfianza = 95;
     private double valorXPrediccion = 1000000;
+    private const double EscalaPrecio = 1_000_000;
 
     protected override void OnInitialized()
     {
@@ -296,6 +326,11 @@
             return (resultado.limInf, resultado.limSup);
         }
     }
+
+    private double PendientePorMillon => Regresion.B1 * EscalaPrecio;
+
+    private (double limInf, double limSup) ICPendientePorMillon =>
+        (ICPendiente.limInf * EscalaPrecio, ICPendiente.limSup * EscalaPrecio);
 
     private (double limInf, double limSup) ICMedia
     {

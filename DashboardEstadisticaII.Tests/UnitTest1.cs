@@ -6,6 +6,24 @@ namespace DashboardEstadisticaII.Tests;
 public class EstadisticaServiceTests
 {
     [Fact]
+    public void TablaDeContingencia_Debe_Sumar_UnidadesVendidas_Y_No_FilasDelArchivo()
+    {
+        var servicio = new EstadisticaService();
+        var ventas = new List<Venta>
+        {
+            new() { Zona = "Centro", ModoUso = "Traslado", Cantidad = 12 },
+            new() { Zona = "Centro", ModoUso = "Traslado", Cantidad = 8 },
+            new() { Zona = "Norte", ModoUso = "Recreativo", Cantidad = 5 }
+        };
+
+        var tabla = servicio.CalcularTablaContingencia(ventas);
+
+        Assert.Equal(25, tabla.Total);
+        Assert.Equal(20, tabla.Frecuencias[tabla.Filas.IndexOf("Centro"), tabla.Columnas.IndexOf("Traslado")]);
+        Assert.Equal(5, tabla.MarginalesFila[tabla.Filas.IndexOf("Norte")]);
+    }
+
+    [Fact]
     public void Intervalos_De_Regresion_Con_Datos_Degenerados_Deben_Ser_Finitos()
     {
         var servicio = new EstadisticaService();
@@ -30,12 +48,18 @@ public class EstadisticaServiceTests
     public void PValores_Deben_Estar_En_Rango_Valido_Y_Finitos()
     {
         var servicio = new EstadisticaService();
-        var datosService = new DatosService();
-        datosService.CargarDatosEjemplo();
+        var ventas = Enumerable.Range(1, 12)
+            .Select(i => new Venta
+            {
+                Zona = i % 2 == 0 ? "Centro" : "Norte",
+                ModoUso = i % 3 == 0 ? "Recreativo" : "Traslado",
+                Precio = 800000m + i * 25000m,
+                Cantidad = 10 + i
+            }).ToList();
 
-        var tabla = servicio.CalcularTablaContingencia(datosService.Ventas);
+        var tabla = servicio.CalcularTablaContingencia(ventas);
         var chi = servicio.CalcularChiCuadrado(tabla);
-        var regresion = servicio.CalcularRegresion(datosService.Ventas);
+        var regresion = servicio.CalcularRegresion(ventas);
         var icMedia = servicio.IntervaloConfianzaMedia(regresion, 1000000, 95);
         var iPred = servicio.IntervaloPrediccion(regresion, 1000000, 95);
 

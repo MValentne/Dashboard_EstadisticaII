@@ -18,48 +18,6 @@ public class DatosService
     /// <summary>Se dispara cuando los datos cambian (archivo nuevo cargado).</summary>
     public event Action? OnDatosChanged;
 
-    public void CargarDatosEjemplo()
-    {
-        var zonas = new[] { "Córdoba Capital", "Zona Limítrofe", "Ciudades Medias" };
-        var modos = new[] { "Transporte principal", "Distancias cortas", "Entretenimiento" };
-        var preciosBase = new Dictionary<string, decimal>
-        {
-            ["Córdoba Capital"] = 1200000m,
-            ["Zona Limítrofe"] = 980000m,
-            ["Ciudades Medias"] = 860000m
-        };
-        var cantidadesBase = new Dictionary<string, int>
-        {
-            ["Transporte principal"] = 30,
-            ["Distancias cortas"] = 24,
-            ["Entretenimiento"] = 18
-        };
-
-        var ventas = new List<Venta>();
-        for (int i = 0; i < 50; i++)
-        {
-            var zona = zonas[i % zonas.Length];
-            var modo = modos[(i / 3) % modos.Length];
-            var variacionPrecio = (i % 6) * 35000m + ((i / 6) % 4) * 18000m;
-            var variacionCantidad = ((i % 5) - 2) * 2;
-            var precio = preciosBase[zona] + variacionPrecio + (modo == "Transporte principal" ? 60000m : 0m);
-            var cantidad = cantidadesBase[modo] + (int)Math.Round(precio / 50000m) - 20 + variacionCantidad;
-
-            ventas.Add(new Venta
-            {
-                Zona = zona,
-                ModoUso = modo,
-                Precio = Math.Max(700000m, precio),
-                Cantidad = Math.Clamp(cantidad, 12, 60)
-            });
-        }
-
-        Ventas = ventas;
-        ErrorMensaje = null;
-        NombreArchivo = "datos-ejemplo.csv";
-        OnDatosChanged?.Invoke();
-    }
-
     /// <summary>
     /// Carga un archivo CSV o XLSX desde el componente InputFile.
     /// </summary>

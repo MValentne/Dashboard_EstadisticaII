@@ -14,8 +14,9 @@ public class EstadisticaService
     // ============================================================
 
     /// <summary>
-    /// Construye la tabla de contingencia cruzada (Zona × ModoUso)
-    /// con frecuencias observadas y marginales.
+    /// Construye la tabla de contingencia cruzada (Zona × ModoUso) usando
+    /// unidades vendidas. Cada fila del archivo aporta su campo Cantidad,
+    /// no una frecuencia artificial de una observación.
     /// </summary>
     public TablaContingenciaResult CalcularTablaContingencia(List<Venta> ventas)
     {
@@ -28,7 +29,7 @@ public class EstadisticaService
         {
             int i = filas.IndexOf(v.Zona);
             int j = columnas.IndexOf(v.ModoUso);
-            if (i >= 0 && j >= 0) freq[i, j]++;
+            if (i >= 0 && j >= 0) freq[i, j] += Math.Max(0, v.Cantidad);
         }
 
         // Calcular marginales

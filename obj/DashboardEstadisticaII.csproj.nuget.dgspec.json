@@ -72,11 +72,6 @@
               "target": "Package",
               "version": "[10.0.10, )"
             },
-            "Microsoft.DotNet.HotReload.WebAssembly.Browser": {
-              "target": "Package",
-              "version": "[10.0.110, )",
-              "autoReferenced": true
-            },
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",

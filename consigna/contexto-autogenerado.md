@@ -1,7 +1,7 @@
 # Contexto Autogenerado — Dashboard Estadístico Tigre II
 
 > **Generado automáticamente por IA asistente (Antigravity — Claude Opus 4.6)**  
-> **Fecha de generación:** 9 de agosto de 2026  
+> **Última actualización:** 11 de agosto de 2026
 > **Proyecto:** Dashboard Estadístico para la materia Estadística II  
 > **Repositorio:** Dashboard_EstadisticaII
 
@@ -26,12 +26,12 @@ El proyecto consiste en un **dashboard estadístico interactivo** desarrollado c
 
 El dashboard recibe un archivo **CSV/Excel** como entrada con datos de ventas y ejecuta cálculos estadísticos que se representan visualmente. Está dividido en dos páginas principales:
 
-- **Página 1 — Vista gerencial simplificada** (perfil directivo): resumen ejecutivo de la asociación entre zona y modo de uso, tabla de contingencia, distribución por zona y un gráfico visual de relación entre precio y cantidad con métricas clave.
+- **Página 1 — Vista gerencial simplificada** (perfil directivo): resumen ejecutivo de unidades vendidas por zona y modo de uso, tabla de contingencia ponderada por ventas reales, distribución por zona y un gráfico visual de relación entre precio y cantidad con métricas clave.
 - **Página 2 — Módulo analista** (perfil técnico): pruebas de hipótesis, intervalos de confianza, predicción avanzada, y diagnóstico de residuos orientados a un uso más profundo y técnico.
 
 Las variables analizadas son:
 - **Cualitativas:** Sucursal/Zona (Córdoba Capital, Zona Limítrofe, Ciudades Medias) y Modo de uso (Transporte principal, Distancias cortas, Entretenimiento)
-- **Cuantitativas:** Precio de venta (ARS) y Cantidad de ventas
+- **Cuantitativas:** Precio de venta (ARS) y cantidad de unidades vendidas
 
 > 📄 Todo el detalle de requisitos se encuentra en [`modelo-del-problema.md`](file:///home/valentinomende/Desktop/Dashboard_EstadisticaII/consigna/modelo-del-problema.md)
 
@@ -122,12 +122,15 @@ Historial de commits (del más antiguo al más reciente):
 - ✅ Reorganización funcional del dashboard según audiencia: gerencial en la primera página y analista en la segunda.
 - ✅ Validación de compilación del proyecto con `dotnet build`.
 - ✅ Implementación de una estructura de dashboard más clara para el usuario final.
+- ✅ Tablas, marginales y distribución por zona calculadas a partir de unidades vendidas, en lugar de contar filas del archivo.
+- ✅ Escala legible para la pendiente e intervalo de confianza: unidades por cada $1.000.000 de precio.
+- ✅ Contexto visible de las pruebas y etiquetas resumidas en cada módulo.
 
 ### Refinamientos pendientes
 - 🔄 Pulir la interfaz visual para que se acerque más a una presentación final académica.
 - 🔄 Mejorar los gráficos para que sean más claros, más legibles y más “de dashboard”.
 - 🔄 Eliminar o adaptar páginas de ejemplo del template si se desea un producto más limpio.
-- 🔄 Afinar textos explicativos y conclusiones para una exposición más sólida.
+- 🔄 Revisar los textos explicativos con los datos definitivos de la entrega para asegurar que las interpretaciones sean apropiadas al caso.
 - 🔄 Mejorar el encabezado y la barra de navegación para reforzar la identidad visual del proyecto.
 - 🔄 Reforzar la identidad visual de Monopatines Voltio en la navegación y los encabezados.
 
@@ -371,6 +374,34 @@ Este avance es importante porque cubre los bloques centrales de la consigna: an�
 - Se cubre tanto el análisis descriptivo como el módulo inferencial, que eran los bloques principales del trabajo.
 - El siguiente paso natural es pulir la interfaz visual y refinar algunos detalles estadísticos para acercarse más al producto final.
 
+### Sesión 12 — 11 de agosto de 2026 (corrección de unidades reales y claridad inferencial)
+
+#### Prompt del usuario:
+> *"Debug Dashboard Blazor wasm: el resumen ejecutivo no refleja la cantidad de ventas real; corregir también la tabla inferencial y la distribución por zona; mejorar el intervalo de confianza de la pendiente; aclarar qué estudia cada prueba; quitar datos de ejemplo; contextualizar las etiquetas de módulos y reemplazar el KPI de modos de uso."*
+
+#### Problema identificado:
+- La tabla de contingencia incrementaba cada celda en `1` por registro del Excel. Por lo tanto, mostraba el número de filas y no las unidades realmente vendidas indicadas por la columna `Cantidad`.
+- Las tablas marginales, la distribución por zona y el cálculo χ² heredaban esa base incorrecta.
+- La pendiente se calculaba por una unidad monetaria (ARS). Al mostrarla con tres decimales, valores válidos pero muy pequeños se redondeaban visualmente a `-0.000`, incluidos los extremos del intervalo.
+- La interfaz no especificaba de forma suficiente las variables ni la hipótesis que evaluaba cada prueba.
+
+#### Acciones realizadas:
+1. **Contingencia ponderada por unidades vendidas** — `CalcularTablaContingencia` pasó a sumar `Cantidad` (con mínimo de cero) en cada combinación Zona × ModoUso. En consecuencia, los totales por fila/columna, la distribución por zona, las frecuencias esperadas y el χ² se basan en unidades vendidas reales.
+2. **Claridad de la tabla inferencial** — Se renombraron los totales como “Total unidades” y se explicó que sus celdas contienen unidades *esperadas* bajo la hipótesis de independencia, no ventas observadas directas.
+3. **Escala de la regresión** — Sin modificar el cálculo estadístico, la pendiente y su intervalo se presentan por cada `$1.000.000` de precio. Esta escala preserva exactamente la inferencia y evita ocultar el resultado mediante redondeo a cero.
+4. **Contexto sutil en interfaz** — Se añadieron subtítulos, hipótesis nulas y badges contextuales: “Unidades por zona”, “Precio y unidades”, “Zona × uso”, “Precio → unidades”, “Correlación”, “Ajuste del modelo” y “Normalidad”.
+5. **Entrada única de datos** — Se retiró el botón y el método de generación de datos de ejemplo. La aplicación queda operando exclusivamente mediante la carga CSV/XLSX.
+6. **KPI más significativo** — Se sustituyó “Modos de uso” por “Unidades vendidas”; se conservaron Observaciones y Zonas registradas.
+7. **Prueba de regresión** — Se agregó una prueba unitaria que confirma que la contingencia suma unidades (`12 + 8 + 5 = 25`) y no registros (`3`). También se adaptó una prueba existente para no depender de datos de ejemplo.
+
+#### Validación:
+- `dotnet test DashboardEstadisticaII.Tests/DashboardEstadisticaII.Tests.csproj --no-restore` finalizó correctamente.
+- `dotnet build --no-restore` finalizó correctamente: 0 advertencias y 0 errores.
+- `git diff --check` no reportó errores de espacios.
+
+#### Decisión estadística relevante:
+La prueba χ² ahora usa las unidades agregadas como frecuencias. Esto corresponde al requerimiento de representar ventas reales; su interpretación presupone que esas unidades pueden tratarse como conteos de la tabla de contingencia. Si una futura fuente de datos registra cantidades que no representan eventos/ventas independientes, deberá revisarse ese supuesto antes de interpretar el p-valor.
+
 ### Sesión 1 — 5 de agosto de 2026
 
 #### Prompt del usuario:
@@ -428,7 +459,7 @@ La mayor parte de los objetivos funcionales principales ya se encuentran impleme
 - [ ] Eliminar o limpiar páginas de ejemplo del template (Counter, Weather)
 
 ### Prioridad Media — Página 1 (Módulo Descriptivo)
-- [x] Tabla de contingencia cruzada con frecuencias observadas y marginales
+- [x] Tabla de contingencia cruzada con unidades vendidas observadas y marginales
 - [x] Indicador dinámico de chi-cuadrado con nivel de significación y p-valor
 - [x] Scatter plot con línea de regresión muestral
 - [x] Tarjetas KPI con correlación de Pearson (r) y determinación (R²)
@@ -442,11 +473,12 @@ La mayor parte de los objetivos funcionales principales ya se encuentran impleme
 - [x] Intervalos de confianza y calculadora de predicción
 - [x] Gráfico de residuos vs. valores ajustados
 - [x] Q-Q Plot de residuos
+- [x] Etiquetas y textos que identifican las variables e hipótesis de cada prueba
 
 ### Prioridad Baja — UI/UX y refinamiento
 - [ ] Diseñar identidad visual más fuerte de Monopatines Voltio
 - [ ] Mejorar el diseño responsive y jerarquía visual
-- [ ] Pulir textos explicativos y conclusiones estadísticas
+- [x] Clarificar textos, hipótesis y contexto estadístico de los módulos
 - [ ] Optimizar la experiencia de uso para una entrega más polished
 - [ ] Ajustar la barra superior y la navegación para una imagen más profesional
 

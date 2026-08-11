@@ -17,7 +17,7 @@ public class Venta
 // ============================================================
 
 /// <summary>
-/// Tabla de contingencia cruzada con frecuencias observadas y marginales.
+/// Tabla de contingencia cruzada con unidades vendidas observadas y marginales.
 /// </summary>
 public class TablaContingenciaResult
 {

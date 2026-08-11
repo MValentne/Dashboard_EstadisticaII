@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "G+OJIseo/Mg=",
+  "dgSpecHash": "yTHp9mWIxcA=",
   "success": true,
   "projectFilePath": "/home/valentino/Desktop/DashboardEstadisticaII/DashboardEstadisticaII.csproj",
   "expectedPackageFiles": [
@@ -20,7 +20,6 @@
     "/home/valentino/.nuget/packages/microsoft.aspnetcore.components.webassembly/10.0.10/microsoft.aspnetcore.components.webassembly.10.0.10.nupkg.sha512",
     "/home/valentino/.nuget/packages/microsoft.aspnetcore.components.webassembly.devserver/10.0.10/microsoft.aspnetcore.components.webassembly.devserver.10.0.10.nupkg.sha512",
     "/home/valentino/.nuget/packages/microsoft.aspnetcore.metadata/10.0.10/microsoft.aspnetcore.metadata.10.0.10.nupkg.sha512",
-    "/home/valentino/.nuget/packages/microsoft.dotnet.hotreload.webassembly.browser/10.0.110/microsoft.dotnet.hotreload.webassembly.browser.10.0.110.nupkg.sha512",
     "/home/valentino/.nuget/packages/microsoft.extensions.configuration/10.0.10/microsoft.extensions.configuration.10.0.10.nupkg.sha512",
     "/home/valentino/.nuget/packages/microsoft.extensions.configuration.abstractions/10.0.10/microsoft.extensions.configuration.abstractions.10.0.10.nupkg.sha512",
     "/home/valentino/.nuget/packages/microsoft.extensions.configuration.binder/10.0.10/microsoft.extensions.configuration.binder.10.0.10.nupkg.sha512",

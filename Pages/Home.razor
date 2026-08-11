@@ -14,7 +14,6 @@
             <p class="text-muted mb-0">Vista simplificada y visual de ventas, zonas y modos de uso para decisiones rápidas del equipo directivo.</p>
         </div>
         <div class="col-lg-4 text-lg-end">
-            <button class="btn btn-outline-secondary me-2" @onclick="CargarEjemplo">Usar datos de ejemplo</button>
             <label class="btn btn-primary mb-0">
                 Cargar archivo CSV/XLSX
                 <InputFile OnChange="OnArchivoSeleccionado" accept=".csv,.xlsx,.xls" class="d-none" />
@@ -48,8 +47,8 @@
         </div>
         <div class="col-md-3">
             <div class="dashboard-card h-100">
-                <div class="text-muted small">Modos de uso</div>
-                <div class="fs-5 fw-semibold">@ObtenerModos().Count</div>
+                <div class="text-muted small">Unidades vendidas</div>
+                <div class="fs-5 fw-semibold">@DatosService.Ventas.Sum(v => Math.Max(0, v.Cantidad))</div>
             </div>
         </div>
     </div>
@@ -69,9 +68,9 @@
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
                             <h4 class="h5 fw-semibold mb-1">Resumen ejecutivo</h4>
-                            <p class="text-muted mb-0">Vista gerencial de la asociación entre zonas y modos de uso.</p>
+                            <p class="text-muted mb-0">Unidades vendidas por zona y modo de uso.</p>
                         </div>
-                        <span class="badge bg-primary-subtle text-primary">Descriptivo</span>
+                        <span class="badge bg-primary-subtle text-primary">Unidades por zona</span>
                     </div>
                     @if (Tabla.Filas.Count > 0 && Tabla.Columnas.Count > 0)
                     {
@@ -84,7 +83,7 @@
                                         {
                                             <th>@col</th>
                                         }
-                                        <th>Total</th>
+                                        <th>Total unidades</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -100,7 +99,7 @@
                                         </tr>
                                     }
                                     <tr>
-                                        <th>Total</th>
+                                        <th>Total unidades</th>
                                         @for (int j = 0; j < Tabla.Columnas.Count; j++)
                                         {
                                             <td class="fw-semibold">@Tabla.MarginalesColumna[j]</td>
@@ -112,7 +111,7 @@
                         </div>
 
                         <div class="mt-4">
-                            <h6 class="fw-semibold">Distribución por zona</h6>
+                            <h6 class="fw-semibold">Distribución de unidades vendidas por zona</h6>
                             <div class="d-flex flex-column gap-2">
                                 @foreach (var fila in ObtenerBarrasPorFila())
                                 {
@@ -143,7 +142,7 @@
                             <h4 class="h5 fw-semibold mb-1">Relación precio vs. cantidad</h4>
                             <p class="text-muted mb-0">Tendencia visual para entender el comportamiento del negocio.</p>
                         </div>
-                        <span class="badge bg-success-subtle text-success">Visual</span>
+                        <span class="badge bg-success-subtle text-success">Precio y unidades</span>
                     </div>
                     <svg viewBox="0 0 420 260" class="chart-svg">
                         <line x1="30" y1="220" x2="390" y2="220" stroke="#6c757d" stroke-width="1"></line>
@@ -183,9 +182,9 @@
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
                             <h4 class="h5 fw-semibold mb-1">Indicador de asociación</h4>
-                            <p class="text-muted mb-0">Resumen simple para el equipo directivo sobre si la distribución cambia entre zonas.</p>
+                            <p class="text-muted mb-0">Prueba si la distribución de unidades vendidas por modo de uso cambia entre zonas.</p>
                         </div>
-                        <span class="badge bg-info-subtle text-info">Gerencial</span>
+                        <span class="badge bg-info-subtle text-info">Zona × uso</span>
                     </div>
                     <div class="row g-3 align-items-end">
                         <div class="col-md-3">
@@ -232,13 +231,7 @@
         }
     }
 
-    private void CargarEjemplo()
-    {
-        DatosService.CargarDatosEjemplo();
-    }
-
     private List<string> ObtenerZonas() => DatosService.Ventas.Select(v => v.Zona).Distinct().ToList();
-    private List<string> ObtenerModos() => DatosService.Ventas.Select(v => v.ModoUso).Distinct().ToList();
 
     private TablaContingenciaResult Tabla => EstadisticaService.CalcularTablaContingencia(DatosService.Ventas);
     private ChiCuadradoResult ChiResultado => EstadisticaService.CalcularChiCuadrado(Tabla, alfaCualitativo);
