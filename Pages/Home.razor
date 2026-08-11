@@ -182,26 +182,26 @@
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
                             <h4 class="h5 fw-semibold mb-1">Indicador de asociación</h4>
-                            <p class="text-muted mb-0">Prueba si la distribución de unidades vendidas por modo de uso cambia entre zonas.</p>
+                            <p class="text-muted mb-0">Resume la prueba t que evalúa si el precio se asocia linealmente con las unidades vendidas.</p>
                         </div>
-                        <span class="badge bg-info-subtle text-info">Zona × uso</span>
+                        <span class="badge bg-success-subtle text-success">Precio → unidades</span>
                     </div>
                     <div class="row g-3 align-items-end">
                         <div class="col-md-3">
                             <div class="metric-card">
-                                <div class="text-muted small">Estadístico χ²</div>
-                                <div class="fs-5 fw-semibold">@ChiResultado.Estadistico.ToString("0.00", CultureInfo.InvariantCulture)</div>
+                                <div class="text-muted small">Estadístico t</div>
+                                <div class="fs-5 fw-semibold">@Regresion.EstadisticoT.ToString("0.000", CultureInfo.InvariantCulture)</div>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="metric-card">
                                 <div class="text-muted small">p-valor</div>
-                                <div class="fs-5 fw-semibold">@ChiResultado.PValor.ToString("0.0000", CultureInfo.InvariantCulture)</div>
+                                <div class="fs-5 fw-semibold">@Regresion.PValorT.ToString("0.0000", CultureInfo.InvariantCulture)</div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <p class="mb-2 fw-semibold">Conclusión breve</p>
-                            <p class="text-muted mb-0">@InterpretacionChi</p>
+                            <p class="text-muted mb-0">@InterpretacionPruebaT</p>
                         </div>
                     </div>
                 </div>
@@ -211,7 +211,7 @@
 </div>
 
 @code {
-    private readonly double alfaCualitativo = 0.05;
+    private readonly double alfaAsociacion = 0.05;
 
     protected override void OnInitialized()
     {
@@ -234,10 +234,9 @@
     private List<string> ObtenerZonas() => DatosService.Ventas.Select(v => v.Zona).Distinct().ToList();
 
     private TablaContingenciaResult Tabla => EstadisticaService.CalcularTablaContingencia(DatosService.Ventas);
-    private ChiCuadradoResult ChiResultado => EstadisticaService.CalcularChiCuadrado(Tabla, alfaCualitativo);
     private RegresionResult Regresion => EstadisticaService.CalcularRegresion(DatosService.Ventas);
 
-    private string InterpretacionChi => EstadisticaService.InterpretarChiCuadrado(ChiResultado, alfaCualitativo);
+    private string InterpretacionPruebaT => EstadisticaService.InterpretarPruebaT(Regresion, alfaAsociacion);
     private string InterpretacionCorrelacion => EstadisticaService.InterpretarCorrelacion(Regresion.R);
     private string InterpretacionR2 => EstadisticaService.InterpretarR2(Regresion.R2);
 
