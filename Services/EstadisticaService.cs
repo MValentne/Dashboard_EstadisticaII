@@ -14,22 +14,21 @@ public class EstadisticaService
     // ============================================================
 
     /// <summary>
-    /// Construye la tabla de contingencia cruzada (Zona × ModoUso) usando
-    /// unidades vendidas. Cada fila del archivo aporta su campo Cantidad,
-    /// no una frecuencia artificial de una observación.
+    /// Construye la tabla de contingencia cruzada (Zona × modo de uso preferido).
+    /// Cada fila del archivo representa una venta individual y aporta frecuencia 1.
     /// </summary>
     public TablaContingenciaResult CalcularTablaContingencia(List<Venta> ventas)
     {
         var filas = ventas.Select(v => v.Zona).Distinct().OrderBy(z => z).ToList();
-        var columnas = ventas.Select(v => v.ModoUso).Distinct().OrderBy(m => m).ToList();
+        var columnas = ventas.Select(v => v.ModoUsoPreferido).Distinct().OrderBy(m => m).ToList();
         int nF = filas.Count, nC = columnas.Count;
 
         var freq = new int[nF, nC];
         foreach (var v in ventas)
         {
             int i = filas.IndexOf(v.Zona);
-            int j = columnas.IndexOf(v.ModoUso);
-            if (i >= 0 && j >= 0) freq[i, j] += Math.Max(0, v.Cantidad);
+            int j = columnas.IndexOf(v.ModoUsoPreferido);
+            if (i >= 0 && j >= 0) freq[i, j]++;
         }
 
         // Calcular marginales
@@ -140,15 +139,16 @@ public ChiCuadradoResult CalcularChiCuadrado(TablaContingenciaResult tabla, doub
 
     /// <summary>
     /// Calcula todos los parámetros de la regresión lineal simple.
-    /// X = Precio de venta, Y = Cantidad de ventas.
+    /// X = antigüedad del vendedor (variable independiente),
+    /// Y = venta total en ARS (variable dependiente).
     /// </summary>
     public RegresionResult CalcularRegresion(List<Venta> ventas)
     {
         int n = ventas.Count;
         if (n < 3)
         {
-            double mediaX0 = ventas.Count > 0 ? ventas.Average(v => (double)v.Precio) : 0;
-            double mediaY0 = ventas.Count > 0 ? ventas.Average(v => (double)v.Cantidad) : 0;
+            double mediaX0 = ventas.Count > 0 ? ventas.Average(v => (double)v.AntiguedadVendedor) : 0;
+            double mediaY0 = ventas.Count > 0 ? ventas.Average(v => (double)v.VentaTotal) : 0;
             return new RegresionResult
             {
                 B0 = 0,
@@ -168,13 +168,13 @@ public ChiCuadradoResult CalcularChiCuadrado(TablaContingenciaResult tabla, doub
                 SumaX2 = 0,
                 Residuos = new List<double>(),
                 ValoresAjustados = new List<double>(),
-                ValoresX = ventas.Select(v => (double)v.Precio).ToList(),
-                ValoresY = ventas.Select(v => (double)v.Cantidad).ToList()
+                ValoresX = ventas.Select(v => (double)v.AntiguedadVendedor).ToList(),
+                ValoresY = ventas.Select(v => (double)v.VentaTotal).ToList()
             };
         }
 
-        var x = ventas.Select(v => (double)v.Precio).ToArray();
-        var y = ventas.Select(v => (double)v.Cantidad).ToArray();
+        var x = ventas.Select(v => (double)v.AntiguedadVendedor).ToArray();
+        var y = ventas.Select(v => (double)v.VentaTotal).ToArray();
 
         double mediaX = x.Average();
         double mediaY = y.Average();
@@ -355,6 +355,64 @@ public ChiCuadradoResult CalcularChiCuadrado(TablaContingenciaResult tabla, doub
         return puntos;
     }
 
+    /// <summary>
+    /// Prueba Jarque-Bera para la normalidad de los residuos. H0: los residuos
+    /// siguen una distribución normal. Se usa una aproximación chi-cuadrado con 2 GL.
+    /// </summary>
+    public PruebaSupuestoResult ProbarNormalidadResiduos(RegresionResult reg, double alfa = 0.05)
+    {
+        var residuos = reg.Residuos;
+        int n = residuos.Count;
+        if (n < 8)
+            return new PruebaSupuestoResult { Nombre = "Jarque-Bera", EsAplicable = false, Mensaje = "Se requieren al menos 8 residuos para evaluar normalidad." };
+
+        double media = residuos.Average();
+        double m2 = residuos.Average(r => Math.Pow(r - media, 2));
+        if (m2 <= 0 || !double.IsFinite(m2))
+            return new PruebaSupuestoResult { Nombre = "Jarque-Bera", EsAplicable = false, Mensaje = "Los residuos no presentan variabilidad suficiente para evaluar normalidad." };
+
+        double m3 = residuos.Average(r => Math.Pow(r - media, 3));
+        double m4 = residuos.Average(r => Math.Pow(r - media, 4));
+        double asimetria = m3 / Math.Pow(m2, 1.5);
+        double curtosis = m4 / (m2 * m2);
+        double jb = n / 6.0 * (asimetria * asimetria + Math.Pow(curtosis - 3, 2) / 4.0);
+        double p = Math.Clamp(1 - ChiSquared.CDF(2, jb), 0, 1);
+        return new PruebaSupuestoResult
+        {
+            Nombre = "Jarque-Bera", Estadistico = jb, GradosLibertad = 2, PValor = p, EsAplicable = true,
+            Mensaje = p < alfa ? $"Se rechaza H₀ (p = {p:0.0000}): hay evidencia de no normalidad en los residuos." : $"No se rechaza H₀ (p = {p:0.0000}): no hay evidencia de apartamiento de la normalidad."
+        };
+    }
+
+    /// <summary>
+    /// Prueba Breusch-Pagan para homocedasticidad. H0: la varianza de los residuos
+    /// es constante respecto de la antigüedad del vendedor.
+    /// </summary>
+    public PruebaSupuestoResult ProbarHomoscedasticidad(RegresionResult reg, double alfa = 0.05)
+    {
+        int n = reg.Residuos.Count;
+        if (n < 4 || reg.ValoresX.Count != n)
+            return new PruebaSupuestoResult { Nombre = "Breusch-Pagan", EsAplicable = false, Mensaje = "No hay datos suficientes para evaluar igualdad de varianzas." };
+
+        var x = reg.ValoresX;
+        var z = reg.Residuos.Select(r => r * r).ToArray();
+        double mx = x.Average(), mz = z.Average();
+        double sxx = x.Sum(v => Math.Pow(v - mx, 2));
+        double szz = z.Sum(v => Math.Pow(v - mz, 2));
+        double sxz = x.Zip(z, (vx, vz) => (vx - mx) * (vz - mz)).Sum();
+        if (sxx <= 0 || szz <= 0)
+            return new PruebaSupuestoResult { Nombre = "Breusch-Pagan", EsAplicable = false, Mensaje = "No hay variabilidad suficiente para evaluar igualdad de varianzas." };
+
+        double r2Aux = Math.Clamp((sxz * sxz) / (sxx * szz), 0, 1);
+        double bp = n * r2Aux;
+        double p = Math.Clamp(1 - ChiSquared.CDF(1, bp), 0, 1);
+        return new PruebaSupuestoResult
+        {
+            Nombre = "Breusch-Pagan", Estadistico = bp, GradosLibertad = 1, PValor = p, EsAplicable = true,
+            Mensaje = p < alfa ? $"Se rechaza H₀ (p = {p:0.0000}): hay evidencia de varianza no constante (heterocedasticidad)." : $"No se rechaza H₀ (p = {p:0.0000}): no hay evidencia de varianzas desiguales (homocedasticidad)."
+        };
+    }
+
     // ============================================================
     // INTERPRETACIONES DINÁMICAS
     // ============================================================
@@ -373,14 +431,14 @@ public ChiCuadradoResult CalcularChiCuadrado(TablaContingenciaResult tabla, doub
         };
 
         return $"Correlación lineal {fuerza} y {direccion}. " +
-               $"En este conjunto, los cambios en el precio acompañan cambios en la cantidad vendida " +
+               $"En este conjunto, la antigüedad del vendedor se relaciona con la venta total " +
                $"de forma {(absR >= 0.5 ? "visible" : "leve")}.";
     }
 
     public string InterpretarR2(double r2)
     {
-        return $"El {r2 * 100:F1}% de la variabilidad observada en la cantidad de ventas " +
-               $"se asocia con la relación lineal con el precio. " +
+        return $"El {r2 * 100:F1}% de la variabilidad observada en la venta total " +
+               $"se asocia con la relación lineal con la antigüedad del vendedor. " +
                $"El {(1 - r2) * 100:F1}% restante puede deberse a otros factores no incluidos en este modelo.";
     }
 
@@ -392,8 +450,8 @@ public ChiCuadradoResult CalcularChiCuadrado(TablaContingenciaResult tabla, doub
             : $"No se rechaza H₀ al nivel α = {alfa:0.00}.";
 
         string conclusion = rechaza
-            ? "Existe evidencia estadística suficiente para sostener que la pendiente del modelo es distinta de cero."
-            : "No hay evidencia suficiente para afirmar que la pendiente del modelo sea distinta de cero.";
+            ? "Existe evidencia estadística suficiente para sostener una relación lineal entre antigüedad y venta total."
+            : "No hay evidencia suficiente para afirmar una relación lineal entre antigüedad y venta total.";
 
         return $"{decision} {conclusion}";
     }
@@ -406,8 +464,8 @@ public ChiCuadradoResult CalcularChiCuadrado(TablaContingenciaResult tabla, doub
             : $"No se rechaza H₀ al nivel α = {alfa:0.00}.";
 
         string conclusion = rechaza
-            ? "Existe evidencia estadística suficiente para afirmar que la distribución de modo de uso cambia entre zonas."
-            : "No hay evidencia suficiente para afirmar que la distribución de modo de uso cambie entre zonas.";
+            ? "Existe evidencia estadística suficiente para afirmar que el modo de uso preferido se asocia con la zona."
+            : "No hay evidencia suficiente para afirmar que el modo de uso preferido se asocie con la zona.";
 
         return $"{decision} {conclusion}";
     }

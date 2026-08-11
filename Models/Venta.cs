@@ -2,14 +2,15 @@ namespace DashboardEstadisticaII.Models;
 
 /// <summary>
 /// Representa una fila del dataset de ventas.
-/// Columnas: Zona, ModoUso, Precio, Cantidad.
+/// Columnas: Sucursal/Zona, Modo de uso preferido, Venta total y
+/// Antigüedad del vendedor. Cada instancia representa una venta individual.
 /// </summary>
 public class Venta
 {
     public string Zona { get; set; } = "";
-    public string ModoUso { get; set; } = "";
-    public decimal Precio { get; set; }
-    public int Cantidad { get; set; }
+    public string ModoUsoPreferido { get; set; } = "";
+    public decimal VentaTotal { get; set; }
+    public decimal AntiguedadVendedor { get; set; }
 }
 
 // ============================================================
@@ -17,7 +18,7 @@ public class Venta
 // ============================================================
 
 /// <summary>
-/// Tabla de contingencia cruzada con unidades vendidas observadas y marginales.
+/// Tabla de contingencia cruzada con ventas individuales observadas y marginales.
 /// </summary>
 public class TablaContingenciaResult
 {
@@ -75,6 +76,17 @@ public class RegresionResult
     public List<double> ValoresY { get; set; } = new();
 }
 
+/// <summary>Resultado de una prueba de supuestos del modelo de regresión.</summary>
+public class PruebaSupuestoResult
+{
+    public string Nombre { get; set; } = "";
+    public double Estadistico { get; set; }
+    public int GradosLibertad { get; set; }
+    public double PValor { get; set; }
+    public bool EsAplicable { get; set; }
+    public string Mensaje { get; set; } = "";
+}
+
 // ============================================================
 // Clases auxiliares para gráficos
 // ============================================================
@@ -90,6 +102,6 @@ public class PuntoXY
 public class DatoContingencia
 {
     public string Zona { get; set; } = "";
-    public string ModoUso { get; set; } = "";
+    public string ModoUsoPreferido { get; set; } = "";
     public int Frecuencia { get; set; }
 }

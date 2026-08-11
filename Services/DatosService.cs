@@ -76,19 +76,19 @@ public class DatosService
         // Detectar encabezados
         var header = ParsearLineaCSV(lineas[0]);
         var idxZona = BuscarColumna(header, "zona", "sucursal");
-        var idxModo = BuscarColumna(header, "modo");
-        var idxPrecio = BuscarColumna(header, "precio");
-        var idxCantidad = BuscarColumna(header, "cantidad");
+        var idxModo = BuscarColumna(header, "modo de uso preferido", "modo uso");
+        var idxVentaTotal = BuscarColumna(header, "venta total", "total venta");
+        var idxAntiguedad = BuscarColumna(header, "antigüedad", "antiguedad");
 
-        if (idxZona < 0 || idxModo < 0 || idxPrecio < 0 || idxCantidad < 0)
+        if (idxZona < 0 || idxModo < 0 || idxVentaTotal < 0 || idxAntiguedad < 0)
         {
             ErrorMensaje = "No se encontraron las columnas requeridas. " +
-                           "El archivo debe contener: Zona/Sucursal, Modo de uso, Precio, Cantidad.";
+                           "El archivo debe contener: Sucursal/Zona, Modo de uso preferido, Venta total y Antigüedad del vendedor.";
             return;
         }
 
         var ventas = new List<Venta>();
-        var maxIdx = new[] { idxZona, idxModo, idxPrecio, idxCantidad }.Max();
+        var maxIdx = new[] { idxZona, idxModo, idxVentaTotal, idxAntiguedad }.Max();
 
         for (int i = 1; i < lineas.Length; i++)
         {
@@ -102,9 +102,9 @@ public class DatosService
             ventas.Add(new Venta
             {
                 Zona = zona,
-                ModoUso = modo,
-                Precio = ParsearDecimal(campos[idxPrecio]),
-                Cantidad = ParsearEntero(campos[idxCantidad])
+                ModoUsoPreferido = modo,
+                VentaTotal = ParsearDecimal(campos[idxVentaTotal]),
+                AntiguedadVendedor = ParsearDecimal(campos[idxAntiguedad])
             });
         }
 
@@ -138,11 +138,11 @@ public class DatosService
             var headers = headerCells.Select(c => c.GetString().ToLowerInvariant()).ToList();
 
             var idxZona = BuscarColumnaLista(headers, "zona", "sucursal");
-            var idxModo = BuscarColumnaLista(headers, "modo");
-            var idxPrecio = BuscarColumnaLista(headers, "precio");
-            var idxCantidad = BuscarColumnaLista(headers, "cantidad");
+            var idxModo = BuscarColumnaLista(headers, "modo de uso preferido", "modo uso");
+            var idxVentaTotal = BuscarColumnaLista(headers, "venta total", "total venta");
+            var idxAntiguedad = BuscarColumnaLista(headers, "antigüedad", "antiguedad");
 
-            if (idxZona < 0 || idxModo < 0 || idxPrecio < 0 || idxCantidad < 0)
+            if (idxZona < 0 || idxModo < 0 || idxVentaTotal < 0 || idxAntiguedad < 0)
             {
                 ErrorMensaje = "No se encontraron las columnas requeridas en la hoja de cálculo.";
                 return;
@@ -159,9 +159,9 @@ public class DatosService
                 ventas.Add(new Venta
                 {
                     Zona = zona,
-                    ModoUso = modo,
-                    Precio = ParsearDecimal(fila.Cell(idxPrecio + 1).GetString()),
-                    Cantidad = ParsearEntero(fila.Cell(idxCantidad + 1).GetString())
+                    ModoUsoPreferido = modo,
+                    VentaTotal = ParsearDecimal(fila.Cell(idxVentaTotal + 1).GetString()),
+                    AntiguedadVendedor = ParsearDecimal(fila.Cell(idxAntiguedad + 1).GetString())
                 });
             }
 
@@ -219,11 +219,4 @@ public class DatosService
         return 0;
     }
 
-    private static int ParsearEntero(string valor)
-    {
-        valor = valor.Trim().Trim('"').Replace(".", "").Replace(",", "");
-        if (int.TryParse(valor, out var result))
-            return result;
-        return 0;
-    }
 }

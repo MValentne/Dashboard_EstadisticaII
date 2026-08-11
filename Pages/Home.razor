@@ -35,7 +35,7 @@
         </div>
         <div class="col-md-3">
             <div class="dashboard-card h-100">
-                <div class="text-muted small">Observaciones</div>
+                <div class="text-muted small">Ventas registradas</div>
                 <div class="fs-5 fw-semibold">@DatosService.Ventas.Count</div>
             </div>
         </div>
@@ -47,8 +47,8 @@
         </div>
         <div class="col-md-3">
             <div class="dashboard-card h-100">
-                <div class="text-muted small">Unidades vendidas</div>
-                <div class="fs-5 fw-semibold">@DatosService.Ventas.Sum(v => Math.Max(0, v.Cantidad))</div>
+                <div class="text-muted small">Venta total acumulada</div>
+                <div class="fs-5 fw-semibold">@DatosService.Ventas.Sum(v => v.VentaTotal).ToString("C0", new CultureInfo("es-AR"))</div>
             </div>
         </div>
     </div>
@@ -57,7 +57,7 @@
     {
         <div class="dashboard-card text-center py-5">
             <h5 class="mb-3">Aún no hay datos cargados</h5>
-            <p class="text-muted mb-0">Suba un archivo CSV o Excel con las columnas Zona, ModoUso, Precio y Cantidad para comenzar.</p>
+            <p class="text-muted mb-0">Suba un archivo CSV o Excel con Sucursal/Zona, Modo de uso preferido, Venta total y Antigüedad del vendedor.</p>
         </div>
     }
     else
@@ -68,9 +68,9 @@
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
                             <h4 class="h5 fw-semibold mb-1">Resumen ejecutivo</h4>
-                            <p class="text-muted mb-0">Unidades vendidas por zona y modo de uso.</p>
+                            <p class="text-muted mb-0">Cantidad de ventas individuales por zona y modo de uso preferido.</p>
                         </div>
-                        <span class="badge bg-primary-subtle text-primary">Unidades por zona</span>
+                        <span class="badge bg-primary-subtle text-primary">Ventas por zona</span>
                     </div>
                     @if (Tabla.Filas.Count > 0 && Tabla.Columnas.Count > 0)
                     {
@@ -83,7 +83,7 @@
                                         {
                                             <th>@col</th>
                                         }
-                                        <th>Total unidades</th>
+                                        <th>Total ventas</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -99,7 +99,7 @@
                                         </tr>
                                     }
                                     <tr>
-                                        <th>Total unidades</th>
+                                        <th>Total ventas</th>
                                         @for (int j = 0; j < Tabla.Columnas.Count; j++)
                                         {
                                             <td class="fw-semibold">@Tabla.MarginalesColumna[j]</td>
@@ -111,7 +111,7 @@
                         </div>
 
                         <div class="mt-4">
-                            <h6 class="fw-semibold">Distribución de unidades vendidas por zona</h6>
+                            <h6 class="fw-semibold">Distribución de ventas por zona</h6>
                             <div class="d-flex flex-column gap-2">
                                 @foreach (var fila in ObtenerBarrasPorFila())
                                 {
@@ -139,10 +139,10 @@
                 <div class="dashboard-card h-100">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
-                            <h4 class="h5 fw-semibold mb-1">Relación precio vs. cantidad</h4>
-                            <p class="text-muted mb-0">Tendencia visual para entender el comportamiento del negocio.</p>
+                            <h4 class="h5 fw-semibold mb-1">Antigüedad del vendedor vs. venta total</h4>
+                            <p class="text-muted mb-0">Tendencia visual entre la experiencia del vendedor y el importe de cada venta.</p>
                         </div>
-                        <span class="badge bg-success-subtle text-success">Precio y unidades</span>
+                        <span class="badge bg-success-subtle text-success">Antigüedad → venta total</span>
                     </div>
                     <svg viewBox="0 0 420 260" class="chart-svg">
                         <line x1="30" y1="220" x2="390" y2="220" stroke="#6c757d" stroke-width="1"></line>
@@ -182,9 +182,9 @@
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div>
                             <h4 class="h5 fw-semibold mb-1">Indicador de asociación</h4>
-                            <p class="text-muted mb-0">Resume la prueba t que evalúa si el precio se asocia linealmente con las unidades vendidas.</p>
+                            <p class="text-muted mb-0">Resume la prueba t sobre la relación lineal entre antigüedad del vendedor y venta total.</p>
                         </div>
-                        <span class="badge bg-success-subtle text-success">Precio → unidades</span>
+                        <span class="badge bg-success-subtle text-success">Antigüedad → venta total</span>
                     </div>
                     <div class="row g-3 align-items-end">
                         <div class="col-md-3">
@@ -202,6 +202,7 @@
                         <div class="col-md-6">
                             <p class="mb-2 fw-semibold">Conclusión breve</p>
                             <p class="text-muted mb-0">@InterpretacionPruebaT</p>
+                            <p class="small text-muted mt-2 mb-0"><strong>H₀:</strong> la pendiente antigüedad–venta total es cero. <strong>H₁:</strong> la pendiente es distinta de cero.</p>
                         </div>
                     </div>
                 </div>
@@ -245,10 +246,6 @@
         return Tabla.Filas.Select((f, i) => (f, Tabla.MarginalesFila[i])).ToList();
     }
 
-    private decimal PrecioMin => DatosService.Ventas.Count > 0 ? DatosService.Ventas.Min(v => v.Precio) : 0m;
-    private decimal PrecioMax => DatosService.Ventas.Count > 0 ? DatosService.Ventas.Max(v => v.Precio) : 0m;
-    private int CantidadMin => DatosService.Ventas.Count > 0 ? DatosService.Ventas.Min(v => v.Cantidad) : 0;
-    private int CantidadMax => DatosService.Ventas.Count > 0 ? DatosService.Ventas.Max(v => v.Cantidad) : 0;
 
     private List<(string X, string Y)> PuntosDispersion
     {

@@ -1,6 +1,6 @@
 # Contexto Autogenerado — Dashboard Estadístico Tigre II
 
-> **Generado automáticamente por IA asistente (Antigravity — Claude Opus 4.6)**  
+> **Generado automáticamente por asistentes de IA; última actualización realizada por Codex**
 > **Última actualización:** 11 de agosto de 2026
 > **Proyecto:** Dashboard Estadístico para la materia Estadística II  
 > **Repositorio:** Dashboard_EstadisticaII
@@ -24,16 +24,18 @@
 
 El proyecto consiste en un **dashboard estadístico interactivo** desarrollado como trabajo final de la materia **Estadística II**. El contexto ficticio se enmarca en la empresa **Monopatines Eléctricos Voltio**, con sucursales en la provincia de Córdoba, Argentina.
 
-El dashboard recibe un archivo **CSV/Excel** como entrada con datos de ventas y ejecuta cálculos estadísticos que se representan visualmente. Está dividido en dos páginas principales:
+El dashboard recibe un archivo **CSV/Excel** con registros de ventas y ejecuta cálculos estadísticos que se representan visualmente. Está dividido en dos páginas principales:
 
-- **Página 1 — Vista gerencial simplificada** (perfil directivo): resumen ejecutivo de unidades vendidas por zona y modo de uso, tabla de contingencia ponderada por ventas reales, distribución por zona y un gráfico visual de relación entre precio y cantidad con métricas clave.
+- **Página 1 — Vista gerencial simplificada** (perfil directivo): resumen ejecutivo de ventas por zona y modo de uso preferido, distribución por zona y un gráfico de la relación entre antigüedad del vendedor y venta total, con sus métricas clave.
 - **Página 2 — Módulo analista** (perfil técnico): pruebas de hipótesis, intervalos de confianza, predicción avanzada, y diagnóstico de residuos orientados a un uso más profundo y técnico.
 
 Las variables analizadas son:
-- **Cualitativas:** Sucursal/Zona (Córdoba Capital, Zona Limítrofe, Ciudades Medias) y Modo de uso (Transporte principal, Distancias cortas, Entretenimiento)
-- **Cuantitativas:** Precio de venta (ARS) y cantidad de unidades vendidas
+- **Cualitativas:** Sucursal/Zona y modo de uso preferido.
+- **Cuantitativas:** Venta total (ARS) y antigüedad del vendedor (años).
 
-> 📄 Todo el detalle de requisitos se encuentra en [`modelo-del-problema.md`](file:///home/valentinomende/Desktop/Dashboard_EstadisticaII/consigna/modelo-del-problema.md)
+Cada fila del archivo representa una venta individual: la tabla de contingencia cuenta registros, no cantidades agregadas de unidades.
+
+> 📄 Todo el detalle de requisitos se encuentra en [`modelo-del-problema.md`](modelo-del-problema.md).
 
 ---
 
@@ -91,14 +93,16 @@ Historial de commits (del más antiguo al más reciente):
 
 ## 4. Estado actual del código
 
-### Resumen: El proyecto ya no se encuentra en estado de template inicial; ahora cuenta con una implementación funcional de un dashboard estadístico en Blazor WASM.
+### Resumen
+
+El proyecto ya no se encuentra en estado de template inicial: cuenta con una implementación funcional de un dashboard estadístico en Blazor WASM. El árbol de trabajo contiene cambios locales posteriores al último commit, por lo que el estado descrito aquí refleja tanto el último commit como esos cambios aún no confirmados.
 
 #### Componentes implementados
-- **Modelo de datos** — Se creó `Venta` y los objetos auxiliares para resultados de análisis estadístico.
+- **Modelo de datos** — `Venta` representa una venta individual con zona, modo de uso preferido, venta total y antigüedad del vendedor; existen objetos auxiliares para los resultados estadísticos.
 - **Carga de archivos** — La aplicación permite cargar datasets desde CSV o Excel en memoria mediante `InputFile`.
-- **Página 1 — Vista gerencial** — Se reorganizó la primera pantalla para priorizar un resumen ejecutivo visual: tabla de contingencia, distribución por zona y relación precio-cantidad con interpretaciones simples.
+- **Página 1 — Vista gerencial** — Prioriza un resumen ejecutivo visual: tabla de contingencia, distribución por zona y relación antigüedad–venta total con interpretaciones simples.
 - **Página 2 — Módulo analista** — Se consolidó la segunda vista para concentrar pruebas de hipótesis, intervalos de confianza, predicción y diagnóstico de residuos.
-- **Servicios de negocio** — Se implementaron `DatosService` y `EstadisticaService` para separar carga y cálculo estadístico.
+- **Servicios de negocio** — `DatosService` carga CSV/XLSX y `EstadisticaService` calcula la contingencia, chi-cuadrado, regresión, intervalos, predicción y pruebas de supuestos de los residuos (Jarque-Bera y Breusch-Pagan).
 - **Estilo visual base** — Se agregó una apariencia más coherente para el dashboard con tarjetas, métricas y un look más profesional.
 - **Verificación** — Se validó la compilación del proyecto con `dotnet build`, el cual finalizó correctamente.
 
@@ -108,7 +112,7 @@ Historial de commits (del más antiguo al más reciente):
 - **`Pages/Inferencia.razor`** — Vista de inferencia estadística.
 - **`Services/DatosService.cs`** — Parseo y validación de archivos CSV/XLSX.
 - **`Services/EstadisticaService.cs`** — Cálculos de chi-cuadrado, regresión, residuos e intervalos.
-- **`Models/Venta.cs`** — Modelo de datos y resultados estadísticos.
+- **`Models/Venta.cs`** — Modelo de venta individual y resultados estadísticos, incluido `PruebaSupuestoResult`.
 - **`wwwroot/css/app.css`** — Estilos base del dashboard.
 
 ### Objetivos cumplidos hasta el momento
@@ -122,9 +126,10 @@ Historial de commits (del más antiguo al más reciente):
 - ✅ Reorganización funcional del dashboard según audiencia: gerencial en la primera página y analista en la segunda.
 - ✅ Validación de compilación del proyecto con `dotnet build`.
 - ✅ Implementación de una estructura de dashboard más clara para el usuario final.
-- ✅ Tablas, marginales y distribución por zona calculadas a partir de unidades vendidas, en lugar de contar filas del archivo.
-- ✅ Escala legible para la pendiente e intervalo de confianza: unidades por cada $1.000.000 de precio.
+- ✅ Tablas, marginales y distribución por zona calculadas a partir de ventas individuales (una fila equivale a una venta).
+- ✅ Regresión lineal de venta total en función de la antigüedad del vendedor.
 - ✅ Contexto visible de las pruebas y etiquetas resumidas en cada módulo.
+- ✅ Pruebas de normalidad de residuos (Jarque-Bera) y homocedasticidad (Breusch-Pagan), con manejo de muestras insuficientes.
 
 ### Refinamientos pendientes
 - 🔄 Pulir la interfaz visual para que se acerque más a una presentación final académica.
@@ -133,6 +138,7 @@ Historial de commits (del más antiguo al más reciente):
 - 🔄 Revisar los textos explicativos con los datos definitivos de la entrega para asegurar que las interpretaciones sean apropiadas al caso.
 - 🔄 Mejorar el encabezado y la barra de navegación para reforzar la identidad visual del proyecto.
 - 🔄 Reforzar la identidad visual de Monopatines Voltio en la navegación y los encabezados.
+- 🔄 Revisar que el cambio de variables del dataset sea el definitivo respecto de la consigna original (que menciona precio y cantidad); si no lo fuera, revertir o adaptar el modelo, el cargador y las etiquetas en conjunto.
 
 ---
 
@@ -402,6 +408,28 @@ Este avance es importante porque cubre los bloques centrales de la consigna: an�
 #### Decisión estadística relevante:
 La prueba χ² ahora usa las unidades agregadas como frecuencias. Esto corresponde al requerimiento de representar ventas reales; su interpretación presupone que esas unidades pueden tratarse como conteos de la tabla de contingencia. Si una futura fuente de datos registra cantidades que no representan eventos/ventas independientes, deberá revisarse ese supuesto antes de interpretar el p-valor.
 
+### Sesión 13 — 11 de agosto de 2026 (actualización del modelo de datos y diagnóstico de supuestos)
+
+#### Cambios locales detectados
+
+El estado de trabajo posterior a la sesión 12 cambia el esquema analítico. Esta sección tiene precedencia sobre la descripción de la sesión 12 cuando exista una contradicción.
+
+1. **Cambio de variables de entrada** — `Venta` pasó a utilizar `Zona`, `ModoUsoPreferido`, `VentaTotal` y `AntiguedadVendedor`. El cargador CSV/XLSX ahora exige encabezados equivalentes a *Sucursal/Zona*, *Modo de uso preferido*, *Venta total* y *Antigüedad del vendedor*.
+2. **Unidad de análisis** — Cada fila del archivo se interpreta como una venta individual. Por ello, `CalcularTablaContingencia` incrementa la frecuencia en uno por registro, en lugar de sumar un campo `Cantidad`.
+3. **Regresión actualizada** — El modelo usa antigüedad del vendedor como variable independiente (X) y venta total como variable dependiente (Y). Las etiquetas, gráficos, prueba t, intervalos, predicción e interpretaciones se adaptaron a esta relación.
+4. **Diagnóstico formal de supuestos** — Se añadieron las pruebas Jarque-Bera (normalidad de residuos) y Breusch-Pagan (homocedasticidad). Ambas devuelven un resultado no aplicable y un mensaje explicativo cuando la muestra o la variabilidad son insuficientes.
+5. **Cobertura de pruebas** — Se incorporó una prueba unitaria para exigir resultados finitos de los nuevos diagnósticos y se actualizaron las pruebas existentes a los nuevos nombres de propiedades y a la unidad de análisis por fila.
+
+#### Estado de verificación
+
+- Los cambios de esta sesión están presentes en el directorio de trabajo, pero aún no están confirmados mediante un commit.
+- En esta actualización documental no se ejecutaron `dotnet build` ni `dotnet test`; la próxima verificación debe ejecutarlos antes de considerar cerrada la modificación.
+- También quedaron cambios generados en `obj/` por la restauración de dependencias. No forman parte de la lógica funcional y conviene revisarlos antes de un futuro commit.
+
+#### Riesgo a resolver
+
+El documento de la consigna todavía ejemplifica las variables cuantitativas como precio de venta y cantidad de ventas. Antes de la entrega debe confirmarse que el dataset definitivo utiliza venta total y antigüedad del vendedor. Si la consigna exige estrictamente precio y cantidad, el cambio actual debe adaptarse de forma coherente en modelo, carga, cálculos, pruebas y UI.
+
 ### Sesión 1 — 5 de agosto de 2026
 
 #### Prompt del usuario:
@@ -452,14 +480,14 @@ Este archivo contiene:
 La mayor parte de los objetivos funcionales principales ya se encuentran implementados. Los puntos que siguen pendientes son principalmente de refinamiento y cierre visual.
 
 ### Prioridad Media — Estructura y funcionalidad base
-- [x] Crear modelo de datos `Venta` (Zona, ModoUso, Precio, Cantidad)
+- [x] Crear modelo de datos `Venta` (Zona, ModoUsoPreferido, VentaTotal, AntiguedadVendedor)
 - [x] Implementar componente de carga de CSV/Excel (`<InputFile>`)
 - [x] Parseo de CSV (nativo) y Excel (con ClosedXML)
 - [x] Validación de columnas del archivo de entrada
 - [ ] Eliminar o limpiar páginas de ejemplo del template (Counter, Weather)
 
 ### Prioridad Media — Página 1 (Módulo Descriptivo)
-- [x] Tabla de contingencia cruzada con unidades vendidas observadas y marginales
+- [x] Tabla de contingencia cruzada con ventas individuales observadas y marginales
 - [x] Indicador dinámico de chi-cuadrado con nivel de significación y p-valor
 - [x] Scatter plot con línea de regresión muestral
 - [x] Tarjetas KPI con correlación de Pearson (r) y determinación (R²)
@@ -473,6 +501,7 @@ La mayor parte de los objetivos funcionales principales ya se encuentran impleme
 - [x] Intervalos de confianza y calculadora de predicción
 - [x] Gráfico de residuos vs. valores ajustados
 - [x] Q-Q Plot de residuos
+- [x] Pruebas Jarque-Bera y Breusch-Pagan con control de aplicabilidad
 - [x] Etiquetas y textos que identifican las variables e hipótesis de cada prueba
 
 ### Prioridad Baja — UI/UX y refinamiento
@@ -481,6 +510,7 @@ La mayor parte de los objetivos funcionales principales ya se encuentran impleme
 - [x] Clarificar textos, hipótesis y contexto estadístico de los módulos
 - [ ] Optimizar la experiencia de uso para una entrega más polished
 - [ ] Ajustar la barra superior y la navegación para una imagen más profesional
+- [ ] Confirmar la correspondencia entre las variables del dataset definitivo y las variables especificadas en la consigna.
 
 ---
 

@@ -6,21 +6,21 @@ namespace DashboardEstadisticaII.Tests;
 public class EstadisticaServiceTests
 {
     [Fact]
-    public void TablaDeContingencia_Debe_Sumar_UnidadesVendidas_Y_No_FilasDelArchivo()
+    public void TablaDeContingencia_Debe_Contar_Cada_Fila_Como_Una_Venta()
     {
         var servicio = new EstadisticaService();
         var ventas = new List<Venta>
         {
-            new() { Zona = "Centro", ModoUso = "Traslado", Cantidad = 12 },
-            new() { Zona = "Centro", ModoUso = "Traslado", Cantidad = 8 },
-            new() { Zona = "Norte", ModoUso = "Recreativo", Cantidad = 5 }
+            new() { Zona = "Centro", ModoUsoPreferido = "Traslado", VentaTotal = 1200000m, AntiguedadVendedor = 2 },
+            new() { Zona = "Centro", ModoUsoPreferido = "Traslado", VentaTotal = 980000m, AntiguedadVendedor = 4 },
+            new() { Zona = "Norte", ModoUsoPreferido = "Recreativo", VentaTotal = 760000m, AntiguedadVendedor = 6 }
         };
 
         var tabla = servicio.CalcularTablaContingencia(ventas);
 
-        Assert.Equal(25, tabla.Total);
-        Assert.Equal(20, tabla.Frecuencias[tabla.Filas.IndexOf("Centro"), tabla.Columnas.IndexOf("Traslado")]);
-        Assert.Equal(5, tabla.MarginalesFila[tabla.Filas.IndexOf("Norte")]);
+        Assert.Equal(3, tabla.Total);
+        Assert.Equal(2, tabla.Frecuencias[tabla.Filas.IndexOf("Centro"), tabla.Columnas.IndexOf("Traslado")]);
+        Assert.Equal(1, tabla.MarginalesFila[tabla.Filas.IndexOf("Norte")]);
     }
 
     [Fact]
@@ -29,8 +29,8 @@ public class EstadisticaServiceTests
         var servicio = new EstadisticaService();
         var ventas = new List<Venta>
         {
-            new() { Precio = 1000000m, Cantidad = 20 },
-            new() { Precio = 1000000m, Cantidad = 22 }
+            new() { VentaTotal = 1000000m, AntiguedadVendedor = 2 },
+            new() { VentaTotal = 1200000m, AntiguedadVendedor = 2 }
         };
 
         var regresion = servicio.CalcularRegresion(ventas);
@@ -52,9 +52,9 @@ public class EstadisticaServiceTests
             .Select(i => new Venta
             {
                 Zona = i % 2 == 0 ? "Centro" : "Norte",
-                ModoUso = i % 3 == 0 ? "Recreativo" : "Traslado",
-                Precio = 800000m + i * 25000m,
-                Cantidad = 10 + i
+                ModoUsoPreferido = i % 3 == 0 ? "Recreativo" : "Traslado",
+                VentaTotal = 800000m + i * 25000m,
+                AntiguedadVendedor = 1 + i
             }).ToList();
 
         var tabla = servicio.CalcularTablaContingencia(ventas);
@@ -68,5 +68,29 @@ public class EstadisticaServiceTests
         Assert.True(double.IsFinite(icMedia.limInf) && double.IsFinite(icMedia.limSup));
         Assert.True(double.IsFinite(iPred.limInf) && double.IsFinite(iPred.limSup));
         Assert.True(iPred.limSup - iPred.limInf >= icMedia.limSup - icMedia.limInf);
+    }
+
+    [Fact]
+    public void PruebasDeSupuestos_Deben_Devolver_Resultados_Finitos()
+    {
+        var servicio = new EstadisticaService();
+        var ventas = Enumerable.Range(1, 16).Select(i => new Venta
+        {
+            Zona = i % 2 == 0 ? "Centro" : "Norte",
+            ModoUsoPreferido = i % 3 == 0 ? "Entretenimiento" : "Traslado",
+            AntiguedadVendedor = i,
+            VentaTotal = 700000m + 45000m * i + (i % 2 == 0 ? 12000m : -8000m)
+        }).ToList();
+
+        var regresion = servicio.CalcularRegresion(ventas);
+        var normalidad = servicio.ProbarNormalidadResiduos(regresion);
+        var homoscedasticidad = servicio.ProbarHomoscedasticidad(regresion);
+
+        Assert.True(normalidad.EsAplicable);
+        Assert.True(homoscedasticidad.EsAplicable);
+        Assert.True(double.IsFinite(normalidad.Estadistico));
+        Assert.InRange(normalidad.PValor, 0, 1);
+        Assert.True(double.IsFinite(homoscedasticidad.Estadistico));
+        Assert.InRange(homoscedasticidad.PValor, 0, 1);
     }
 }
