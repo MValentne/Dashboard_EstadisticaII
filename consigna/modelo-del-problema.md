@@ -31,12 +31,14 @@ Somos parte del equipo informatico de una empresa ficticia llamada *Monopatines 
 Se nos solicita en consigna seleccionar variables a analizar (que estaran incluidas en el CSV/EXCEl), nosotros seleccionamos las siguientes:
 
 **Cualitativas:**
-1. Sucursal / Zona : Cordoba Capital/ Zona Limitrofe/ Ciudades Medias
-2. Modo de uso (respecto al transporte con el monopatin): Transporte principal / Distancias cortas/ Entretenimiento (juguete)
+1. Sucursal / Zona: Córdoba Capital / Zona Limítrofe / Ciudades Medias.
+2. Modo de uso preferido (respecto al transporte con el monopatín): Transporte principal / Distancias cortas / Entretenimiento.
 
-**Cuantitativas:** (Lo mas obvio para nuestro contexto)
-1. Precio de venta
-2. Cantidad de ventas
+**Cuantitativas:**
+1. Venta total (ARS): importe total de una venta individual.
+2. Antigüedad del vendedor (años): experiencia del vendedor que concretó esa venta.
+
+La relación cuantitativa se analiza como **antigüedad del vendedor (X)** → **venta total (Y)**. Cada fila del archivo representa una venta individual; por tanto, las frecuencias de las tablas cualitativas corresponden a la cantidad de registros, no a unidades agregadas.
 
 El dashboard se divide en dos paginas:
 
@@ -54,7 +56,7 @@ Dentro de esta pagina principal, deben haber dos modulos:
 - Indicador dinámico del estadístico de la muestra con un deslizador de variable del nivel de significancia y el p-valor. No debe tener Conclusiones , eso estara en la pagina 2.
 
 ### Modulo cuantitativo (Relacion y Regresion de la Muestra):
-Selección de Variables: Definir dos variables cuantitativas de interés (ej. Gasto semanal en publicidad [“x”] y Volumen de ventas semanal [“y”]; o Horas de capacitación de operarios [“X ”] y Tasa de error operativo [“Y”]]). (Nosotros ya definimos nuestras variables arriba!!!)
+Selección de Variables: se utiliza la **antigüedad del vendedor** como variable independiente (X) y la **venta total** como variable dependiente (Y).
 
 **Visualizaciones e Indicadores**
 - Gráfico de dispersión (Scatter Plot) interactivo que muestre la nube de puntos muestrales actuales.
@@ -83,18 +85,30 @@ Homocedasticidad). Gráfico de Probabilidad Normal (Q-Q Plot) de los residuos o 
 residuos (para verificar el supuesto de Normalidad).
 
 # Especificaciones del archivo CSV/EXCEL de entrada
-Visualmente, el archivo CSV/EXCEL contiene una tabla con un material como este:
+El archivo CSV/Excel debe contener una única tabla, con una fila de encabezados y una fila por venta individual. Se puede usar la siguiente tabla como base para crear nuevos archivos Excel:
 
-| Sucursal / Zona | Modo de uso | Precio de venta (ARS) | Cantidad de ventas |
-|-----------------|-------------|-----------------------:|-------------------:|
-| Córdoba Capital | Transporte principal | 1.250.000 | 48 |
-| Zona Limítrofe | Distancias cortas | 980.000 | 35 |
-| Ciudades Medias | Entretenimiento | 760.000 | 22 |
-| Córdoba Capital | Distancias cortas | 1.180.000 | 41 |
-| Zona Limítrofe | Transporte principal | 1.320.000 | 29 |
-| Ciudades Medias | Distancias cortas | 890.000 | 31 |
-| Córdoba Capital | Entretenimiento | 840.000 | 19 |
-| Zona Limítrofe | Distancias cortas | 950.000 | 27 |
+| Sucursal / Zona | Modo de uso preferido | Venta total (ARS) | Antigüedad del vendedor (años) |
+|-----------------|------------------------|------------------:|--------------------------------:|
+| Córdoba Capital | Transporte principal | 1450000 | 6.0 |
+| Córdoba Capital | Transporte principal | 1320000 | 4.5 |
+| Córdoba Capital | Distancias cortas | 980000 | 2.0 |
+| Córdoba Capital | Distancias cortas | 1060000 | 3.5 |
+| Córdoba Capital | Entretenimiento | 790000 | 1.0 |
+| Córdoba Capital | Entretenimiento | 860000 | 2.5 |
+| Zona Limítrofe | Transporte principal | 1280000 | 5.0 |
+| Zona Limítrofe | Transporte principal | 1170000 | 3.0 |
+| Zona Limítrofe | Distancias cortas | 940000 | 2.0 |
+| Zona Limítrofe | Distancias cortas | 1010000 | 4.0 |
+| Zona Limítrofe | Entretenimiento | 720000 | 1.0 |
+| Zona Limítrofe | Entretenimiento | 830000 | 2.5 |
+| Ciudades Medias | Transporte principal | 1190000 | 5.5 |
+| Ciudades Medias | Transporte principal | 1080000 | 3.5 |
+| Ciudades Medias | Distancias cortas | 880000 | 2.0 |
+| Ciudades Medias | Distancias cortas | 960000 | 4.0 |
+| Ciudades Medias | Entretenimiento | 690000 | 0.5 |
+| Ciudades Medias | Entretenimiento | 780000 | 2.0 |
+
+Para evitar problemas de importación, se recomienda conservar estos encabezados. El cargador también reconoce equivalentes que contengan `Sucursal` o `Zona`, `Modo de uso preferido`, `Venta total` y `Antigüedad`/`Antiguedad`. Las columnas cuantitativas deben contener números; en Excel se recomienda guardarlas como valores numéricos, sin el símbolo `$` ni texto adicional.
 
 ## Integración de carga de CSV/Excel
 
@@ -107,7 +121,7 @@ Visualmente, el archivo CSV/EXCEL contiene una tabla con un material como este:
 7. Guardar los registros en `List<Venta>`.
 8. Actualizar el estado del componente con `StateHasChanged()`.
 9. Hacer que todas las tablas, gráficos y estadísticas usen `List<Venta>` como fuente de datos.
-10. Validar que el archivo tenga las columnas esperadas: `Zona`, `ModoUso`, `Precio`, `Cantidad`.
+10. Validar que el archivo tenga las columnas esperadas: `Sucursal / Zona`, `Modo de uso preferido`, `Venta total (ARS)` y `Antigüedad del vendedor (años)`.
 11. Mostrar un mensaje de error si el formato es inválido.
 12. No guardar el archivo en disco; procesarlo completamente en memoria.
 
